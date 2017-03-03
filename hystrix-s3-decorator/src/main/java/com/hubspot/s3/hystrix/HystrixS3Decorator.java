@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkBaseException;
+import com.amazonaws.services.s3.AmazonS3;
 import com.hubspot.s3.S3Decorator;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommand.Setter;
@@ -15,6 +16,31 @@ import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 
 public abstract class HystrixS3Decorator extends S3Decorator {
+
+  public static HystrixS3Decorator decorate(AmazonS3 amazonS3) {
+    return new HystrixS3Decorator() {
+
+      @Override
+      protected AmazonS3 getDelegate() {
+        return amazonS3;
+      }
+    };
+  }
+
+  public static HystrixS3Decorator decorate(AmazonS3 amazonS3, Setter setter) {
+    return new HystrixS3Decorator() {
+
+      @Override
+      protected AmazonS3 getDelegate() {
+        return amazonS3;
+      }
+
+      @Override
+      protected Setter getSetter() {
+        return setter;
+      }
+    };
+  }
 
   @Override
   protected <T> Callable<T> decorate(Callable<T> callable) {

@@ -18,14 +18,7 @@ public class HystrixS3DecoratorTest {
 
   @Test
   public void succeedingClientWorks() throws InterruptedException {
-    AmazonS3 succeedingClient = new SucceedingS3Client();
-    AmazonS3 s3 = new HystrixS3Decorator() {
-
-      @Override
-      protected AmazonS3 getDelegate() {
-        return succeedingClient;
-      }
-    };
+    AmazonS3 s3 = HystrixS3Decorator.decorate(new SucceedingS3Client());
 
     for (int i = 0; i < 100; i++ ) {
       assertThat(s3.getObjectMetadata("test-bucket", "test-key")).isNotNull();
@@ -35,14 +28,7 @@ public class HystrixS3DecoratorTest {
 
   @Test
   public void itShortCircuitsFailingClientEventually() throws InterruptedException {
-    AmazonS3 failingClient = new FailingS3Client();
-    AmazonS3 s3 = new HystrixS3Decorator() {
-
-      @Override
-      protected AmazonS3 getDelegate() {
-        return failingClient;
-      }
-    };
+    AmazonS3 s3 = HystrixS3Decorator.decorate(new FailingS3Client());
 
     for (int i = 0; i < 100; i++ ) {
       try {
@@ -63,14 +49,7 @@ public class HystrixS3DecoratorTest {
 
   @Test
   public void itDoesntCount404AsFailure() throws InterruptedException {
-    AmazonS3 missingClient = new MissingS3Client();
-    AmazonS3 s3 = new HystrixS3Decorator() {
-
-      @Override
-      protected AmazonS3 getDelegate() {
-        return missingClient;
-      }
-    };
+    AmazonS3 s3 = HystrixS3Decorator.decorate(new MissingS3Client());
 
     for (int i = 0; i < 100; i++ ) {
       try {
