@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.hubspot</groupId>
+    <artifactId>basepom</artifactId>
+    <version>15.8</version>
+  </parent>
+
+  <artifactId>s3-decorators</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <project.build.targetJdk>1.8</project.build.targetJdk>
+    <aws.sdk.version>1.11.98</aws.sdk.version>
+  </properties>
+
+  <modules>
+    <module>s3-decorators-core</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-s3</artifactId>
+        <version>${aws.sdk.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
