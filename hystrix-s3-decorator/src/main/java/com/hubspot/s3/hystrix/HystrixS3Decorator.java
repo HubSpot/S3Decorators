@@ -16,15 +16,25 @@ import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 
 public abstract class HystrixS3Decorator extends S3Decorator {
+  protected abstract Setter getSetter();
 
-  public static HystrixS3Decorator decorate(AmazonS3 amazonS3) {
-    return new HystrixS3Decorator() {
-
-      @Override
-      protected AmazonS3 getDelegate() {
-        return amazonS3;
+  @Override
+  protected <T> Callable<T> decorate(Callable<T> callable) {
+    return () -> {
+      try {
+        return new S3Command<>(getSetter(), callable).execute();
+      } catch (HystrixRuntimeException | HystrixBadRequestException e) {
+        if (e.getCause() instanceof SdkBaseException) {
+          throw (SdkBaseException) e.getCause();
+        } else {
+          throw e;
+        }
       }
     };
+  }
+
+  public static HystrixS3Decorator decorate(AmazonS3 amazonS3) {
+    return decorate(amazonS3, defaultSetter());
   }
 
   public static HystrixS3Decorator decorate(AmazonS3 amazonS3, Setter setter) {
@@ -42,22 +52,7 @@ public abstract class HystrixS3Decorator extends S3Decorator {
     };
   }
 
-  @Override
-  protected <T> Callable<T> decorate(Callable<T> callable) {
-    return () -> {
-      try {
-        return new S3Command<>(getSetter(), callable).execute();
-      } catch (HystrixRuntimeException | HystrixBadRequestException e) {
-        if (e.getCause() instanceof SdkBaseException) {
-          throw (SdkBaseException) e.getCause();
-        } else {
-          throw e;
-        }
-      }
-    };
-  }
-
-  protected Setter getSetter() {
+  private static Setter defaultSetter() {
     return Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("s3"))
         .andCommandKey(HystrixCommandKey.Factory.asKey("s3"))
         .andCommandPropertiesDefaults(
