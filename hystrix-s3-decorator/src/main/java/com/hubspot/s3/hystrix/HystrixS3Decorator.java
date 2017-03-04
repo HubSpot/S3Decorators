@@ -18,14 +18,41 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 public class HystrixS3Decorator extends S3Decorator {
   private final HystrixS3 primary;
   private final HystrixS3 fallback;
+  private final FallbackMode fallbackMode;
 
-  private HystrixS3Decorator(HystrixS3 primary, HystrixS3 fallback) {
+  private HystrixS3Decorator(HystrixS3 primary) {
+    this(primary, null, FallbackMode.NONE);
+  }
+
+  private HystrixS3Decorator(HystrixS3 primary, HystrixS3 fallback, FallbackMode fallbackMode) {
     this.primary = primary;
     this.fallback = fallback;
+    this.fallbackMode = fallbackMode;
   }
 
   @Override
-  protected <T> T call(Function<AmazonS3, T> function) {
+  protected <T> T read(Function<AmazonS3, T> function) {
+    switch (fallbackMode) {
+      case READ:
+      case READ_WRITE:
+        return call(function, primary, fallback);
+      default:
+        return call(function, primary, null);
+    }
+  }
+
+  @Override
+  protected <T> T write(Function<AmazonS3, T> function) {
+    switch (fallbackMode) {
+      case WRITE:
+      case READ_WRITE:
+        return call(function, primary, fallback);
+      default:
+        return call(function, primary, null);
+    }
+  }
+
+  private <T> T call(Function<AmazonS3, T> function, HystrixS3 primary, HystrixS3 fallback) {
     try {
       return new S3Command<>(function, primary, fallback).execute();
     } catch (HystrixRuntimeException | HystrixBadRequestException e) {
@@ -42,15 +69,35 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   public static HystrixS3Decorator decorate(AmazonS3 s3, Setter setter) {
-    return new HystrixS3Decorator(new HystrixS3(s3, setter), null);
+    return new HystrixS3Decorator(new HystrixS3(s3, setter));
   }
 
-  public AmazonS3 withFallback(AmazonS3 fallback) {
-    return withFallback(fallback, defaultSetter("s3-fallback"));
+  public AmazonS3 withReadFallback(AmazonS3 fallback) {
+    return withReadFallback(fallback, defaultSetter("s3-fallback"));
   }
 
-  public AmazonS3 withFallback(AmazonS3 fallback, Setter setter) {
-    return new HystrixS3Decorator(primary, new HystrixS3(fallback, setter));
+  public AmazonS3 withReadFallback(AmazonS3 fallback, Setter setter) {
+    return withFallback(new HystrixS3(fallback, setter), FallbackMode.READ);
+  }
+
+  public AmazonS3 withWriteFallback(AmazonS3 fallback) {
+    return withWriteFallback(fallback, defaultSetter("s3-fallback"));
+  }
+
+  public AmazonS3 withWriteFallback(AmazonS3 fallback, Setter setter) {
+    return withFallback(new HystrixS3(fallback, setter), FallbackMode.WRITE);
+  }
+
+  public AmazonS3 withReadWriteFallback(AmazonS3 fallback) {
+    return withReadWriteFallback(fallback, defaultSetter("s3-fallback"));
+  }
+
+  public AmazonS3 withReadWriteFallback(AmazonS3 fallback, Setter setter) {
+    return withFallback(new HystrixS3(fallback, setter), FallbackMode.READ_WRITE);
+  }
+
+  private AmazonS3 withFallback(HystrixS3 fallback, FallbackMode fallbackMode) {
+    return new HystrixS3Decorator(primary, fallback, fallbackMode);
   }
 
   private static Setter defaultSetter(String commandKey) {
@@ -64,6 +111,10 @@ public class HystrixS3Decorator extends S3Decorator {
             HystrixThreadPoolProperties.defaultSetter()
                 .withMaxQueueSize(10)
                 .withQueueSizeRejectionThreshold(10));
+  }
+
+  private enum FallbackMode {
+    NONE, READ, WRITE, READ_WRITE
   }
 
   private static class HystrixS3 {

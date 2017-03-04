@@ -13,14 +13,41 @@ import net.jodah.failsafe.Failsafe;
 public class FailsafeS3Decorator extends S3Decorator {
   private final FailsafeS3 primary;
   private final FailsafeS3 fallback;
+  private final FallbackMode fallbackMode;
 
-  private FailsafeS3Decorator(FailsafeS3 primary, FailsafeS3 fallback) {
+  private FailsafeS3Decorator(FailsafeS3 primary) {
+    this(primary, null, FallbackMode.NONE);
+  }
+
+  private FailsafeS3Decorator(FailsafeS3 primary, FailsafeS3 fallback, FallbackMode fallbackMode) {
     this.primary = primary;
     this.fallback = fallback;
+    this.fallbackMode = fallbackMode;
   }
 
   @Override
-  protected <T> T call(Function<AmazonS3, T> function) {
+  protected <T> T read(Function<AmazonS3, T> function) {
+    switch (fallbackMode) {
+      case READ:
+      case READ_WRITE:
+        return call(function, primary, fallback);
+      default:
+        return call(function, primary, null);
+    }
+  }
+
+  @Override
+  protected <T> T write(Function<AmazonS3, T> function) {
+    switch (fallbackMode) {
+      case WRITE:
+      case READ_WRITE:
+        return call(function, primary, fallback);
+      default:
+        return call(function, primary, null);
+    }
+  }
+
+  private <T> T call(Function<AmazonS3, T> function, FailsafeS3 primary, FailsafeS3 fallback) {
     try {
       return Failsafe.with(primary.getCircuitBreaker()).get(() -> function.apply(primary.getS3()));
     } catch (RuntimeException e) {
@@ -40,15 +67,35 @@ public class FailsafeS3Decorator extends S3Decorator {
   }
 
   public static FailsafeS3Decorator decorate(AmazonS3 s3, CircuitBreaker circuitBreaker) {
-    return new FailsafeS3Decorator(new FailsafeS3(s3, circuitBreaker), null);
+    return new FailsafeS3Decorator(new FailsafeS3(s3, circuitBreaker));
   }
 
-  public AmazonS3 withFallback(AmazonS3 fallback) {
-    return withFallback(fallback, defaultCircuitBreaker());
+  public AmazonS3 withReadFallback(AmazonS3 fallback) {
+    return withReadFallback(fallback, defaultCircuitBreaker());
   }
 
-  public AmazonS3 withFallback(AmazonS3 fallback, CircuitBreaker circuitBreaker) {
-    return new FailsafeS3Decorator(primary, new FailsafeS3(fallback, circuitBreaker));
+  public AmazonS3 withReadFallback(AmazonS3 fallback, CircuitBreaker setter) {
+    return withFallback(new FailsafeS3(fallback, setter), FallbackMode.READ);
+  }
+
+  public AmazonS3 withWriteFallback(AmazonS3 fallback) {
+    return withWriteFallback(fallback, defaultCircuitBreaker());
+  }
+
+  public AmazonS3 withWriteFallback(AmazonS3 fallback, CircuitBreaker setter) {
+    return withFallback(new FailsafeS3(fallback, setter), FallbackMode.WRITE);
+  }
+
+  public AmazonS3 withReadWriteFallback(AmazonS3 fallback) {
+    return withReadWriteFallback(fallback, defaultCircuitBreaker());
+  }
+
+  public AmazonS3 withReadWriteFallback(AmazonS3 fallback, CircuitBreaker setter) {
+    return withFallback(new FailsafeS3(fallback, setter), FallbackMode.READ_WRITE);
+  }
+
+  private AmazonS3 withFallback(FailsafeS3 fallback, FallbackMode fallbackMode) {
+    return new FailsafeS3Decorator(primary, fallback, fallbackMode);
   }
 
   private static CircuitBreaker defaultCircuitBreaker() {
@@ -60,6 +107,10 @@ public class FailsafeS3Decorator extends S3Decorator {
         return true;
       }
     });
+  }
+
+  private enum FallbackMode {
+    NONE, READ, WRITE, READ_WRITE
   }
 
   private static class FailsafeS3 {

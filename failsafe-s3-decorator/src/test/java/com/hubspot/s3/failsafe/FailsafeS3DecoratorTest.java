@@ -31,7 +31,6 @@ public class FailsafeS3DecoratorTest {
       try {
         s3.getObjectMetadata("test-bucket", "test-key");
       } catch (AmazonServiceException e) {
-        // expected
         assertThat(e.getStatusCode()).isEqualTo(500);
       } catch (CircuitBreakerOpenException e) {
         return;
@@ -44,21 +43,65 @@ public class FailsafeS3DecoratorTest {
   }
 
   @Test
-  public void itUsesFallbackClient() {
-    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withFallback(new SucceedingS3Client());
+  public void itUsesReadFallbackClientForReads() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withReadFallback(new SucceedingS3Client());
 
     assertThat(s3.getObjectMetadata("test-bucket", "test-key")).isNotNull();
   }
 
   @Test
+  public void itDoesntUseWriteFallbackClientForReads() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withWriteFallback(new SucceedingS3Client());
+
+    try {
+      s3.getObjectMetadata("test-bucket", "test-key");
+      fail("Should have thrown 500");
+    } catch (AmazonServiceException e) {
+      assertThat(e.getStatusCode()).isEqualTo(500);
+    }
+  }
+
+  @Test
+  public void itUsesReadWriteFallbackClientForReads() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withReadWriteFallback(new SucceedingS3Client());
+
+    assertThat(s3.getObjectMetadata("test-bucket", "test-key")).isNotNull();
+  }
+
+  @Test
+  public void itDoesntUseReadFallbackClientForWrites() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withReadFallback(new SucceedingS3Client());
+
+    try {
+      s3.deleteBucket("test-bucket");
+      fail("Should have thrown 500");
+    } catch (AmazonServiceException e) {
+      assertThat(e.getStatusCode()).isEqualTo(500);
+    }
+  }
+
+  @Test
+  public void itUsesWriteFallbackClientForWrites() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withWriteFallback(new SucceedingS3Client());
+
+    s3.deleteBucket("test-bucket");
+  }
+
+  @Test
+  public void itUsesReadWriteFallbackClientForWrites() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withReadWriteFallback(new SucceedingS3Client());
+
+    s3.deleteBucket("test-bucket");
+  }
+
+  @Test
   public void itDoesntCount404AsFailure() {
-    AmazonS3 s3 = FailsafeS3Decorator.decorate(new MissingS3Client()).withFallback(new SucceedingS3Client());
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new MissingS3Client()).withReadWriteFallback(new SucceedingS3Client());
 
     try {
       s3.getObjectMetadata("test-bucket", "test-key");
       fail("Should have thrown 404");
     } catch (AmazonServiceException e) {
-      // expected
       assertThat(e.getStatusCode()).isEqualTo(404);
     }
   }
@@ -67,6 +110,14 @@ public class FailsafeS3DecoratorTest {
 
     @Override
     public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonServiceException {
+      AmazonS3Exception exception = new AmazonS3Exception("Internal Error");
+      exception.setStatusCode(500);
+      exception.setErrorType(ErrorType.Service);
+      throw exception;
+    }
+
+    @Override
+    public void deleteBucket(String bucketName) throws AmazonServiceException {
       AmazonS3Exception exception = new AmazonS3Exception("Internal Error");
       exception.setStatusCode(500);
       exception.setErrorType(ErrorType.Service);
@@ -83,6 +134,14 @@ public class FailsafeS3DecoratorTest {
       exception.setErrorType(ErrorType.Client);
       throw exception;
     }
+
+    @Override
+    public void deleteBucket(String bucketName) throws AmazonServiceException {
+      AmazonS3Exception exception = new AmazonS3Exception("Not Found");
+      exception.setStatusCode(404);
+      exception.setErrorType(ErrorType.Client);
+      throw exception;
+    }
   }
 
   private static class SucceedingS3Client extends AbstractAmazonS3 {
@@ -91,5 +150,8 @@ public class FailsafeS3DecoratorTest {
     public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonServiceException {
       return new ObjectMetadata();
     }
+
+    @Override
+    public void deleteBucket(String bucketName) {}
   }
 }
