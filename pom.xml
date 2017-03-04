@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>s3-decorators</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -63,4 +63,8 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <scm>
+    <tag>s3-decorators-0.2</tag>
+  </scm>
 </project>
