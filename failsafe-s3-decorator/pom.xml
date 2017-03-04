@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>s3-decorators</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1</version>
   </parent>
 
   <artifactId>failsafe-s3-decorator</artifactId>
