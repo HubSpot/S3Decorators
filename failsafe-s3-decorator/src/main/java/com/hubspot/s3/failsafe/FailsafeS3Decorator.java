@@ -43,11 +43,11 @@ public class FailsafeS3Decorator extends S3Decorator {
     return new FailsafeS3Decorator(new FailsafeS3(s3, circuitBreaker), null);
   }
 
-  public FailsafeS3Decorator withFallback(AmazonS3 fallback) {
+  public AmazonS3 withFallback(AmazonS3 fallback) {
     return withFallback(fallback, defaultCircuitBreaker());
   }
 
-  public FailsafeS3Decorator withFallback(AmazonS3 fallback, CircuitBreaker circuitBreaker) {
+  public AmazonS3 withFallback(AmazonS3 fallback, CircuitBreaker circuitBreaker) {
     return new FailsafeS3Decorator(primary, new FailsafeS3(fallback, circuitBreaker));
   }
 

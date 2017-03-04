@@ -20,10 +20,7 @@ public class FailsafeS3DecoratorTest {
   public void succeedingClientWorks() throws InterruptedException {
     AmazonS3 s3 = FailsafeS3Decorator.decorate(new SucceedingS3Client());
 
-    for (int i = 0; i < 100; i++ ) {
-      assertThat(s3.getObjectMetadata("test-bucket", "test-key")).isNotNull();
-      Thread.sleep(100);
-    }
+    assertThat(s3.getObjectMetadata("test-bucket", "test-key")).isNotNull();
   }
 
   @Test
@@ -47,18 +44,22 @@ public class FailsafeS3DecoratorTest {
   }
 
   @Test
-  public void itDoesntCount404AsFailure() throws InterruptedException {
-    AmazonS3 s3 = FailsafeS3Decorator.decorate(new MissingS3Client());
+  public void itUsesFallbackClient() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new FailingS3Client()).withFallback(new SucceedingS3Client());
 
-    for (int i = 0; i < 100; i++ ) {
-      try {
-        s3.getObjectMetadata("test-bucket", "test-key");
-      } catch (AmazonServiceException e) {
-        // expected
-        assertThat(e.getStatusCode()).isEqualTo(404);
-      }
+    assertThat(s3.getObjectMetadata("test-bucket", "test-key")).isNotNull();
+  }
 
-      Thread.sleep(100);
+  @Test
+  public void itDoesntCount404AsFailure() {
+    AmazonS3 s3 = FailsafeS3Decorator.decorate(new MissingS3Client()).withFallback(new SucceedingS3Client());
+
+    try {
+      s3.getObjectMetadata("test-bucket", "test-key");
+      fail("Should have thrown 404");
+    } catch (AmazonServiceException e) {
+      // expected
+      assertThat(e.getStatusCode()).isEqualTo(404);
     }
   }
 

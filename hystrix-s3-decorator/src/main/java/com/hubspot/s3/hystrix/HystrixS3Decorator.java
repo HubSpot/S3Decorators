@@ -45,11 +45,11 @@ public class HystrixS3Decorator extends S3Decorator {
     return new HystrixS3Decorator(new HystrixS3(s3, setter), null);
   }
 
-  public HystrixS3Decorator withFallback(AmazonS3 fallback) {
+  public AmazonS3 withFallback(AmazonS3 fallback) {
     return withFallback(fallback, defaultSetter("s3-fallback"));
   }
 
-  public HystrixS3Decorator withFallback(AmazonS3 fallback, Setter setter) {
+  public AmazonS3 withFallback(AmazonS3 fallback, Setter setter) {
     return new HystrixS3Decorator(primary, new HystrixS3(fallback, setter));
   }
 
