@@ -25,13 +25,15 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   private HystrixS3Decorator(HystrixS3 primary, HystrixS3 fallback, FallbackMode fallbackMode) {
-    this.primary = primary;
+    this.primary = checkNotNull(primary, "primary");
     this.fallback = fallback;
-    this.fallbackMode = fallbackMode;
+    this.fallbackMode = checkNotNull(fallbackMode, "fallbackMode");
   }
 
   @Override
   protected <T> T read(Function<AmazonS3, T> function) {
+    checkNotNull(function, "function");
+
     switch (fallbackMode) {
       case READ:
       case READ_WRITE:
@@ -43,6 +45,8 @@ public class HystrixS3Decorator extends S3Decorator {
 
   @Override
   protected <T> T write(Function<AmazonS3, T> function) {
+    checkNotNull(function, "function");
+
     switch (fallbackMode) {
       case WRITE:
       case READ_WRITE:
@@ -113,6 +117,14 @@ public class HystrixS3Decorator extends S3Decorator {
                 .withQueueSizeRejectionThreshold(10));
   }
 
+  private static <T> T checkNotNull(T value, String parameterName) {
+    if (value == null) {
+      throw new NullPointerException(parameterName + " must not be null");
+    } else {
+      return value;
+    }
+  }
+
   private enum FallbackMode {
     NONE, READ, WRITE, READ_WRITE
   }
@@ -122,8 +134,8 @@ public class HystrixS3Decorator extends S3Decorator {
     private final Setter setter;
 
     private HystrixS3(AmazonS3 s3, Setter setter) {
-      this.s3 = s3;
-      this.setter = setter;
+      this.s3 = checkNotNull(s3, "s3");
+      this.setter = checkNotNull(setter, "setter");
     }
 
     public AmazonS3 getS3() {
