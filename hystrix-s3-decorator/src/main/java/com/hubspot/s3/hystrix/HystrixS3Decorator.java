@@ -69,7 +69,7 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   public static HystrixS3Decorator decorate(AmazonS3 s3) {
-    return decorate(s3, defaultSetter("s3-primary"));
+    return decorate(s3, defaultSetter(s3));
   }
 
   public static HystrixS3Decorator decorate(AmazonS3 s3, Setter setter) {
@@ -77,7 +77,7 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   public AmazonS3 withReadFallback(AmazonS3 fallback) {
-    return withReadFallback(fallback, defaultSetter("s3-fallback"));
+    return withReadFallback(fallback, defaultSetter(fallback));
   }
 
   public AmazonS3 withReadFallback(AmazonS3 fallback, Setter setter) {
@@ -85,7 +85,7 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   public AmazonS3 withWriteFallback(AmazonS3 fallback) {
-    return withWriteFallback(fallback, defaultSetter("s3-fallback"));
+    return withWriteFallback(fallback, defaultSetter(fallback));
   }
 
   public AmazonS3 withWriteFallback(AmazonS3 fallback, Setter setter) {
@@ -93,7 +93,7 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   public AmazonS3 withReadWriteFallback(AmazonS3 fallback) {
-    return withReadWriteFallback(fallback, defaultSetter("s3-fallback"));
+    return withReadWriteFallback(fallback, defaultSetter(fallback));
   }
 
   public AmazonS3 withReadWriteFallback(AmazonS3 fallback, Setter setter) {
@@ -104,9 +104,9 @@ public class HystrixS3Decorator extends S3Decorator {
     return new HystrixS3Decorator(primary, fallback, fallbackMode);
   }
 
-  private static Setter defaultSetter(String commandKey) {
+  private static Setter defaultSetter(AmazonS3 s3) {
     return Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("s3"))
-        .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey))
+        .andCommandKey(HystrixCommandKey.Factory.asKey(s3.getRegionName()))
         .andCommandPropertiesDefaults(
             HystrixCommandProperties.defaultSetter()
                 .withCircuitBreakerRequestVolumeThreshold(5)

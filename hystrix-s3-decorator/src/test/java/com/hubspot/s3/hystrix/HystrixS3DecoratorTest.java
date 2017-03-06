@@ -110,6 +110,11 @@ public class HystrixS3DecoratorTest {
   private static class FailingS3Client extends AbstractAmazonS3 {
 
     @Override
+    public String getRegionName() {
+      return "failing";
+    }
+
+    @Override
     public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonServiceException {
       AmazonS3Exception exception = new AmazonS3Exception("Internal Error");
       exception.setStatusCode(500);
@@ -129,6 +134,11 @@ public class HystrixS3DecoratorTest {
   private static class MissingS3Client extends AbstractAmazonS3 {
 
     @Override
+    public String getRegionName() {
+      return "missing";
+    }
+
+    @Override
     public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonServiceException {
       AmazonS3Exception exception = new AmazonS3Exception("Not Found");
       exception.setStatusCode(404);
@@ -146,6 +156,11 @@ public class HystrixS3DecoratorTest {
   }
 
   private static class SucceedingS3Client extends AbstractAmazonS3 {
+
+    @Override
+    public String getRegionName() {
+      return "succeeding";
+    }
 
     @Override
     public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonServiceException {
