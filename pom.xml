@@ -21,6 +21,7 @@
     <module>s3-decorators-core</module>
     <module>hystrix-s3-decorator</module>
     <module>failsafe-s3-decorator</module>
+    <module>metrics-s3-decorator</module>
   </modules>
 
   <dependencyManagement>
@@ -33,6 +34,11 @@
       <dependency>
         <groupId>com.hubspot</groupId>
         <artifactId>hystrix-s3-decorator</artifactId>
+        <version>${project.version</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hubspot</groupId>
+        <artifactId>metrics-s3-decorator</artifactId>
         <version>${project.version</version>
       </dependency>
       <dependency>
