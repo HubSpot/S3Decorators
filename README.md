@@ -114,6 +114,7 @@ return MetricsS3Decorator.decorate(s3, registry);
 This will create two timers: 
 - `com.hubspot.s3.metric.MetricsS3Decorator.reads`
 - `com.hubspot.s3.metric.MetricsS3Decorator.writes`
+
 As well as two meters:
 - `com.hubspot.s3.metric.MetricsS3Decorator.readExceptions`
 - `com.hubspot.s3.metric.MetricsS3Decorator.writeExceptions`
