@@ -150,6 +150,10 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
     });
   }
 
+  protected static boolean is404(Throwable t) {
+    return t instanceof AmazonServiceException && ((AmazonServiceException) t).getStatusCode() == 404;
+  }
+
   @Override
   public void setEndpoint(String endpoint) {
     writeReturnVoid(s3 -> s3.setEndpoint(endpoint));

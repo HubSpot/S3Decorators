@@ -3,7 +3,6 @@ package com.hubspot.s3.failsafe;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.hubspot.s3.S3Decorator;
 
@@ -56,7 +55,7 @@ public class FailsafeS3Decorator extends S3Decorator {
       return Failsafe.with(primary.getCircuitBreaker()).get(() -> function.apply(primary.getS3()));
     } catch (RuntimeException e) {
       // don't count 404 as failure
-      if (e instanceof AmazonServiceException && ((AmazonServiceException) e).getStatusCode() == 404) {
+      if (is404(e)) {
         throw e;
       } else if (fallback != null) {
         return Failsafe.with(fallback.getCircuitBreaker()).get(() -> function.apply(fallback.getS3()));
@@ -103,14 +102,7 @@ public class FailsafeS3Decorator extends S3Decorator {
   }
 
   private static CircuitBreaker defaultCircuitBreaker() {
-    return new CircuitBreaker().withFailureThreshold(6, 10).withDelay(5, TimeUnit.SECONDS).failOn(t -> {
-      if (t instanceof AmazonServiceException) {
-        AmazonServiceException serviceException = (AmazonServiceException) t;
-        return serviceException.getStatusCode() != 404;
-      } else {
-        return true;
-      }
-    });
+    return new CircuitBreaker().withFailureThreshold(6, 10).withDelay(5, TimeUnit.SECONDS).failOn(t -> !is404(t));
   }
 
   private static <T> T checkNotNull(T value, String parameterName) {
