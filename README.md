@@ -6,6 +6,7 @@ This library allows you to decorate an `AmazonS3` client in order to intercept a
 - adding a circuit-breaker to S3 calls to fail fast in the event of an outage
 - capturing metrics around S3 call durations and responses
 - debug logging of all S3 calls
+- injecting failures for testing
 
 ## Usage
 
