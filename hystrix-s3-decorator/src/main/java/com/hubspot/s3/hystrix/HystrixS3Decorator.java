@@ -110,11 +110,11 @@ public class HystrixS3Decorator extends S3Decorator {
         .andCommandPropertiesDefaults(
             HystrixCommandProperties.defaultSetter()
                 .withCircuitBreakerRequestVolumeThreshold(5)
-                .withExecutionTimeoutInMilliseconds(5000))
+                .withExecutionTimeoutEnabled(false))
         .andThreadPoolPropertiesDefaults(
             HystrixThreadPoolProperties.defaultSetter()
-                .withMaxQueueSize(10)
-                .withQueueSizeRejectionThreshold(10));
+                .withMaxQueueSize(5)
+                .withQueueSizeRejectionThreshold(5));
   }
 
   private static <T> T checkNotNull(T value, String parameterName) {
