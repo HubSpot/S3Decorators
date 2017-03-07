@@ -99,5 +99,5 @@ return MetricsS3Decorator.decorate(s3, registry);
 This will create a timer for request duration: 
 - `com.hubspot.s3.metrics.MetricsS3Decorator.requests`
 
-As well as meter for exceptions:
+As well as a meter for exceptions:
 - `com.hubspot.s3.metrics.MetricsS3Decorator.exceptions`
