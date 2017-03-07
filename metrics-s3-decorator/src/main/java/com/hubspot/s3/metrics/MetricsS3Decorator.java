@@ -1,6 +1,6 @@
 package com.hubspot.s3.metrics;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -12,17 +12,13 @@ import com.hubspot.s3.S3Decorator;
 
 public class MetricsS3Decorator extends S3Decorator {
   private final AmazonS3 delegate;
-  private final Timer readTimer;
-  private final Meter readExceptions;
-  private final Timer writeTimer;
-  private final Meter writeExceptions;
+  private final Timer requestTimer;
+  private final Meter exceptionMeter;
 
   private MetricsS3Decorator(AmazonS3 delegate, MetricRegistry metricRegistry) {
     this.delegate = delegate;
-    this.readTimer = metricRegistry.timer(metricName("reads"));
-    this.readExceptions = metricRegistry.meter(metricName("readExceptions"));
-    this.writeTimer = metricRegistry.timer(metricName("writes"));
-    this.writeExceptions = metricRegistry.meter(metricName("writeExceptions"));
+    this.requestTimer = metricRegistry.timer(metricName("requests"));
+    this.exceptionMeter = metricRegistry.meter(metricName("exceptions"));
   }
 
   public static AmazonS3 decorate(AmazonS3 s3, MetricRegistry metricRegistry) {
@@ -30,25 +26,17 @@ public class MetricsS3Decorator extends S3Decorator {
   }
 
   @Override
-  protected <T> T read(Function<AmazonS3, T> function) {
-    try (Context context = readTimer.time()) {
-      return function.apply(delegate);
-    } catch (AmazonServiceException e) {
-      if (!is404(e)) {
-        readExceptions.mark();
-      }
-
-      throw e;
-    }
+  protected AmazonS3 getDelegate() {
+    return delegate;
   }
 
   @Override
-  protected <T> T write(Function<AmazonS3, T> function) {
-    try (Context context = writeTimer.time()) {
-      return function.apply(delegate);
+  protected <T> T call(Supplier<T> callable) {
+    try (Context context = requestTimer.time()) {
+      return callable.get();
     } catch (AmazonServiceException e) {
       if (!is404(e)) {
-        writeExceptions.mark();
+        exceptionMeter.mark();
       }
 
       throw e;

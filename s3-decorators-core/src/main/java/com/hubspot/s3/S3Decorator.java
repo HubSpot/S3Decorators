@@ -5,8 +5,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.AmazonWebServiceRequest;
@@ -140,12 +139,12 @@ import com.amazonaws.services.s3.model.metrics.MetricsConfiguration;
 import com.amazonaws.services.s3.waiters.AmazonS3Waiters;
 
 public abstract class S3Decorator extends AbstractAmazonS3 {
-  protected abstract <T> T read(Function<AmazonS3, T> function);
-  protected abstract <T> T write(Function<AmazonS3, T> function);
+  protected abstract AmazonS3 getDelegate();
+  protected abstract <T> T call(Supplier<T> callable);
 
-  protected void writeReturnVoid(Consumer<AmazonS3> consumer) {
-    write(s3 -> {
-      consumer.accept(s3);
+  protected void run(Runnable runnable) {
+    call(() -> {
+      runnable.run();
       return null;
     });
   }
@@ -156,786 +155,786 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
 
   @Override
   public void setEndpoint(String endpoint) {
-    writeReturnVoid(s3 -> s3.setEndpoint(endpoint));
+    getDelegate().setEndpoint(endpoint);
   }
 
   @Override
   public void setRegion(Region region) throws IllegalArgumentException {
-    writeReturnVoid(s3 -> s3.setRegion(region));
+    getDelegate().setRegion(region);
   }
 
   @Override
   public void setS3ClientOptions(S3ClientOptions clientOptions) {
-    writeReturnVoid(s3 -> s3.setS3ClientOptions(clientOptions));
+    getDelegate().setS3ClientOptions(clientOptions);
   }
 
   @Override
   public void changeObjectStorageClass(String bucketName, String key, StorageClass newStorageClass) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.changeObjectStorageClass(bucketName, key, newStorageClass));
+    run(() -> getDelegate().changeObjectStorageClass(bucketName, key, newStorageClass));
   }
 
   @Override
   public void setObjectRedirectLocation(String bucketName, String key, String newRedirectLocation) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setObjectRedirectLocation(bucketName, key, newRedirectLocation));
+    run(() -> getDelegate().setObjectRedirectLocation(bucketName, key, newRedirectLocation));
   }
 
   @Override
   public ObjectListing listObjects(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listObjects(bucketName));
+    return call(() -> getDelegate().listObjects(bucketName));
   }
 
   @Override
   public ObjectListing listObjects(String bucketName, String prefix) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listObjects(bucketName, prefix));
+    return call(() -> getDelegate().listObjects(bucketName, prefix));
   }
 
   @Override
   public ObjectListing listObjects(ListObjectsRequest listObjectsRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listObjects(listObjectsRequest));
+    return call(() -> getDelegate().listObjects(listObjectsRequest));
   }
 
   @Override
   public ListObjectsV2Result listObjectsV2(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listObjectsV2(bucketName));
+    return call(() -> getDelegate().listObjectsV2(bucketName));
   }
 
   @Override
   public ListObjectsV2Result listObjectsV2(String bucketName, String prefix) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listObjectsV2(bucketName, prefix));
+    return call(() -> getDelegate().listObjectsV2(bucketName, prefix));
   }
 
   @Override
   public ListObjectsV2Result listObjectsV2(ListObjectsV2Request listObjectsV2Request) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listObjectsV2(listObjectsV2Request));
+    return call(() -> getDelegate().listObjectsV2(listObjectsV2Request));
   }
 
   @Override
   public ObjectListing listNextBatchOfObjects(ObjectListing previousObjectListing) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listNextBatchOfObjects(previousObjectListing));
+    return call(() -> getDelegate().listNextBatchOfObjects(previousObjectListing));
   }
 
   @Override
   public ObjectListing listNextBatchOfObjects(ListNextBatchOfObjectsRequest listNextBatchOfObjectsRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listNextBatchOfObjects(listNextBatchOfObjectsRequest));
+    return call(() -> getDelegate().listNextBatchOfObjects(listNextBatchOfObjectsRequest));
   }
 
   @Override
   public VersionListing listVersions(String bucketName, String prefix) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listVersions(bucketName, prefix));
+    return call(() -> getDelegate().listVersions(bucketName, prefix));
   }
 
   @Override
   public VersionListing listVersions(String bucketName, String prefix, String keyMarker, String versionIdMarker, String delimiter, Integer maxResults) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listVersions(bucketName, prefix, keyMarker, versionIdMarker, delimiter, maxResults));
+    return call(() -> getDelegate().listVersions(bucketName, prefix, keyMarker, versionIdMarker, delimiter, maxResults));
   }
 
   @Override
   public VersionListing listVersions(ListVersionsRequest listVersionsRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listVersions(listVersionsRequest));
+    return call(() -> getDelegate().listVersions(listVersionsRequest));
   }
 
   @Override
   public VersionListing listNextBatchOfVersions(VersionListing previousVersionListing) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listNextBatchOfVersions(previousVersionListing));
+    return call(() -> getDelegate().listNextBatchOfVersions(previousVersionListing));
   }
 
   @Override
   public VersionListing listNextBatchOfVersions(ListNextBatchOfVersionsRequest listNextBatchOfVersionsRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listNextBatchOfVersions(listNextBatchOfVersionsRequest));
+    return call(() -> getDelegate().listNextBatchOfVersions(listNextBatchOfVersionsRequest));
   }
 
   @Override
   public Owner getS3AccountOwner() throws SdkClientException, AmazonServiceException {
-    return read(AmazonS3::getS3AccountOwner);
+    return call(() -> getDelegate().getS3AccountOwner());
   }
 
   @Override
   public Owner getS3AccountOwner(GetS3AccountOwnerRequest getS3AccountOwnerRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getS3AccountOwner(getS3AccountOwnerRequest));
+    return call(() -> getDelegate().getS3AccountOwner(getS3AccountOwnerRequest));
   }
 
   @Override
   public boolean doesBucketExist(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.doesBucketExist(bucketName));
+    return call(() -> getDelegate().doesBucketExist(bucketName));
   }
 
   @Override
   public HeadBucketResult headBucket(HeadBucketRequest headBucketRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.headBucket(headBucketRequest));
+    return call(() -> getDelegate().headBucket(headBucketRequest));
   }
 
   @Override
   public List<Bucket> listBuckets() throws SdkClientException, AmazonServiceException {
-    return read(AmazonS3::listBuckets);
+    return call(() -> getDelegate().listBuckets());
   }
 
   @Override
   public List<Bucket> listBuckets(ListBucketsRequest listBucketsRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listBuckets(listBucketsRequest));
+    return call(() -> getDelegate().listBuckets(listBucketsRequest));
   }
 
   @Override
   public String getBucketLocation(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketLocation(bucketName));
+    return call(() -> getDelegate().getBucketLocation(bucketName));
   }
 
   @Override
   public String getBucketLocation(GetBucketLocationRequest getBucketLocationRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketLocation(getBucketLocationRequest));
+    return call(() -> getDelegate().getBucketLocation(getBucketLocationRequest));
   }
 
   @Override
   public Bucket createBucket(CreateBucketRequest createBucketRequest) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.createBucket(createBucketRequest));
+    return call(() -> getDelegate().createBucket(createBucketRequest));
   }
 
   @Override
   public Bucket createBucket(String bucketName) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.createBucket(bucketName));
+    return call(() -> getDelegate().createBucket(bucketName));
   }
 
   @Override
   public Bucket createBucket(String bucketName, com.amazonaws.services.s3.model.Region region) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.createBucket(bucketName, region));
+    return call(() -> getDelegate().createBucket(bucketName, region));
   }
 
   @Override
   public Bucket createBucket(String bucketName, String region) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.createBucket(bucketName, region));
+    return call(() -> getDelegate().createBucket(bucketName, region));
   }
 
   @Override
   public AccessControlList getObjectAcl(String bucketName, String key) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getObjectAcl(bucketName, key));
+    return call(() -> getDelegate().getObjectAcl(bucketName, key));
   }
 
   @Override
   public AccessControlList getObjectAcl(String bucketName, String key, String versionId) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getObjectAcl(bucketName, key, versionId));
+    return call(() -> getDelegate().getObjectAcl(bucketName, key, versionId));
   }
 
   @Override
   public AccessControlList getObjectAcl(GetObjectAclRequest getObjectAclRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getObjectAcl(getObjectAclRequest));
+    return call(() -> getDelegate().getObjectAcl(getObjectAclRequest));
   }
 
   @Override
   public void setObjectAcl(String bucketName, String key, AccessControlList acl) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setObjectAcl(bucketName, key, acl));
+    run(() -> getDelegate().setObjectAcl(bucketName, key, acl));
   }
 
   @Override
   public void setObjectAcl(String bucketName, String key, CannedAccessControlList acl) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setObjectAcl(bucketName, key, acl));
+    run(() -> getDelegate().setObjectAcl(bucketName, key, acl));
   }
 
   @Override
   public void setObjectAcl(String bucketName, String key, String versionId, AccessControlList acl) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setObjectAcl(bucketName, key, versionId, acl));
+    run(() -> getDelegate().setObjectAcl(bucketName, key, versionId, acl));
   }
 
   @Override
   public void setObjectAcl(String bucketName, String key, String versionId, CannedAccessControlList acl) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setObjectAcl(bucketName, key, versionId, acl));
+    run(() -> getDelegate().setObjectAcl(bucketName, key, versionId, acl));
   }
 
   @Override
   public void setObjectAcl(SetObjectAclRequest setObjectAclRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setObjectAcl(setObjectAclRequest));
+    run(() -> getDelegate().setObjectAcl(setObjectAclRequest));
   }
 
   @Override
   public AccessControlList getBucketAcl(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketAcl(bucketName));
+    return call(() -> getDelegate().getBucketAcl(bucketName));
   }
 
   @Override
   public AccessControlList getBucketAcl(GetBucketAclRequest getBucketAclRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketAcl(getBucketAclRequest));
+    return call(() -> getDelegate().getBucketAcl(getBucketAclRequest));
   }
 
   @Override
   public void setBucketAcl(String bucketName, AccessControlList acl) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketAcl(bucketName, acl));
+    run(() -> getDelegate().setBucketAcl(bucketName, acl));
   }
 
   @Override
   public void setBucketAcl(String bucketName, CannedAccessControlList cannedAcl) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketAcl(bucketName, cannedAcl));
+    run(() -> getDelegate().setBucketAcl(bucketName, cannedAcl));
   }
 
   @Override
   public void setBucketAcl(SetBucketAclRequest setBucketAclRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketAcl(setBucketAclRequest));
+    run(() -> getDelegate().setBucketAcl(setBucketAclRequest));
   }
 
   @Override
   public ObjectMetadata getObjectMetadata(String bucketName, String key) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getObjectMetadata(bucketName, key));
+    return call(() -> getDelegate().getObjectMetadata(bucketName, key));
   }
 
   @Override
   public ObjectMetadata getObjectMetadata(GetObjectMetadataRequest getObjectMetadataRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getObjectMetadata(getObjectMetadataRequest));
+    return call(() -> getDelegate().getObjectMetadata(getObjectMetadataRequest));
   }
 
   @Override
   public S3Object getObject(String bucketName, String key) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getObject(bucketName, key));
+    return call(() -> getDelegate().getObject(bucketName, key));
   }
 
   @Override
   public S3Object getObject(GetObjectRequest getObjectRequest) {
-    return read(s3 -> s3.getObject(getObjectRequest));
+    return call(() -> getDelegate().getObject(getObjectRequest));
   }
 
   @Override
   public ObjectMetadata getObject(GetObjectRequest getObjectRequest, File destinationFile) {
-    return read(s3 -> s3.getObject(getObjectRequest, destinationFile));
+    return call(() -> getDelegate().getObject(getObjectRequest, destinationFile));
   }
 
   @Override
   public String getObjectAsString(String bucketName, String key) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getObjectAsString(bucketName, key));
+    return call(() -> getDelegate().getObjectAsString(bucketName, key));
   }
 
   @Override
   public GetObjectTaggingResult getObjectTagging(GetObjectTaggingRequest objectTaggingRequest) {
-    return read(s3 -> s3.getObjectTagging(objectTaggingRequest));
+    return call(() -> getDelegate().getObjectTagging(objectTaggingRequest));
   }
 
   @Override
   public SetObjectTaggingResult setObjectTagging(SetObjectTaggingRequest setObjectTaggingRequest) {
-    return write(s3 -> s3.setObjectTagging(setObjectTaggingRequest));
+    return call(() -> getDelegate().setObjectTagging(setObjectTaggingRequest));
   }
 
   @Override
   public DeleteObjectTaggingResult deleteObjectTagging(DeleteObjectTaggingRequest deleteObjectTaggingRequest) {
-    return write(s3 -> s3.deleteObjectTagging(deleteObjectTaggingRequest));
+    return call(() -> getDelegate().deleteObjectTagging(deleteObjectTaggingRequest));
   }
 
   @Override
   public void deleteBucket(String bucketName) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucket(bucketName));
+    run(() -> getDelegate().deleteBucket(bucketName));
   }
 
   @Override
   public void deleteBucket(DeleteBucketRequest deleteBucketRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucket(deleteBucketRequest));
+    run(() -> getDelegate().deleteBucket(deleteBucketRequest));
   }
 
   @Override
   public PutObjectResult putObject(String bucketName, String key, File file) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.putObject(bucketName, key, file));
+    return call(() -> getDelegate().putObject(bucketName, key, file));
   }
 
   @Override
   public PutObjectResult putObject(String bucketName, String key, InputStream input, ObjectMetadata metadata) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.putObject(bucketName, key, input, metadata));
+    return call(() -> getDelegate().putObject(bucketName, key, input, metadata));
   }
 
   @Override
   public PutObjectResult putObject(PutObjectRequest putObjectRequest) {
-    return write(s3 -> s3.putObject(putObjectRequest));
+    return call(() -> getDelegate().putObject(putObjectRequest));
   }
 
   @Override
   public PutObjectResult putObject(String bucketName, String key, String content) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.putObject(bucketName, key, content));
+    return call(() -> getDelegate().putObject(bucketName, key, content));
   }
 
   @Override
   public CopyObjectResult copyObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey));
+    return call(() -> getDelegate().copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey));
   }
 
   @Override
   public CopyObjectResult copyObject(CopyObjectRequest copyObjectRequest) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.copyObject(copyObjectRequest));
+    return call(() -> getDelegate().copyObject(copyObjectRequest));
   }
 
   @Override
   public CopyPartResult copyPart(CopyPartRequest copyPartRequest) {
-    return write(s3 -> s3.copyPart(copyPartRequest));
+    return call(() -> getDelegate().copyPart(copyPartRequest));
   }
 
   @Override
   public void deleteObject(String bucketName, String key) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteObject(bucketName, key));
+    run(() -> getDelegate().deleteObject(bucketName, key));
   }
 
   @Override
   public void deleteObject(DeleteObjectRequest deleteObjectRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteObject(deleteObjectRequest));
+    run(() -> getDelegate().deleteObject(deleteObjectRequest));
   }
 
   @Override
   public DeleteObjectsResult deleteObjects(DeleteObjectsRequest deleteObjectsRequest) throws SdkClientException, AmazonServiceException {
-    return write(s3 -> s3.deleteObjects(deleteObjectsRequest));
+    return call(() -> getDelegate().deleteObjects(deleteObjectsRequest));
   }
 
   @Override
   public void deleteVersion(String bucketName, String key, String versionId) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteVersion(bucketName, key, versionId));
+    run(() -> getDelegate().deleteVersion(bucketName, key, versionId));
   }
 
   @Override
   public void deleteVersion(DeleteVersionRequest deleteVersionRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteVersion(deleteVersionRequest));
+    run(() -> getDelegate().deleteVersion(deleteVersionRequest));
   }
 
   @Override
   public BucketLoggingConfiguration getBucketLoggingConfiguration(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketLoggingConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketLoggingConfiguration(bucketName));
   }
 
   @Override
   public BucketLoggingConfiguration getBucketLoggingConfiguration(GetBucketLoggingConfigurationRequest getBucketLoggingConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketLoggingConfiguration(getBucketLoggingConfigurationRequest));
+    return call(() -> getDelegate().getBucketLoggingConfiguration(getBucketLoggingConfigurationRequest));
   }
 
   @Override
   public void setBucketLoggingConfiguration(SetBucketLoggingConfigurationRequest setBucketLoggingConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketLoggingConfiguration(setBucketLoggingConfigurationRequest));
+    run(() -> getDelegate().setBucketLoggingConfiguration(setBucketLoggingConfigurationRequest));
   }
 
   @Override
   public BucketVersioningConfiguration getBucketVersioningConfiguration(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketVersioningConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketVersioningConfiguration(bucketName));
   }
 
   @Override
   public BucketVersioningConfiguration getBucketVersioningConfiguration(GetBucketVersioningConfigurationRequest getBucketVersioningConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketVersioningConfiguration(getBucketVersioningConfigurationRequest));
+    return call(() -> getDelegate().getBucketVersioningConfiguration(getBucketVersioningConfigurationRequest));
   }
 
   @Override
   public void setBucketVersioningConfiguration(SetBucketVersioningConfigurationRequest setBucketVersioningConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketVersioningConfiguration(setBucketVersioningConfigurationRequest));
+    run(() -> getDelegate().setBucketVersioningConfiguration(setBucketVersioningConfigurationRequest));
   }
 
   @Override
   public BucketLifecycleConfiguration getBucketLifecycleConfiguration(String bucketName) {
-    return read(s3 -> s3.getBucketLifecycleConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketLifecycleConfiguration(bucketName));
   }
 
   @Override
   public BucketLifecycleConfiguration getBucketLifecycleConfiguration(GetBucketLifecycleConfigurationRequest getBucketLifecycleConfigurationRequest) {
-    return read(s3 -> s3.getBucketLifecycleConfiguration(getBucketLifecycleConfigurationRequest));
+    return call(() -> getDelegate().getBucketLifecycleConfiguration(getBucketLifecycleConfigurationRequest));
   }
 
   @Override
   public void setBucketLifecycleConfiguration(String bucketName, BucketLifecycleConfiguration bucketLifecycleConfiguration) {
-    writeReturnVoid(s3 -> s3.setBucketLifecycleConfiguration(bucketName, bucketLifecycleConfiguration));
+    run(() -> getDelegate().setBucketLifecycleConfiguration(bucketName, bucketLifecycleConfiguration));
   }
 
   @Override
   public void setBucketLifecycleConfiguration(SetBucketLifecycleConfigurationRequest setBucketLifecycleConfigurationRequest) {
-    writeReturnVoid(s3 -> s3.setBucketLifecycleConfiguration(setBucketLifecycleConfigurationRequest));
+    run(() -> getDelegate().setBucketLifecycleConfiguration(setBucketLifecycleConfigurationRequest));
   }
 
   @Override
   public void deleteBucketLifecycleConfiguration(String bucketName) {
-    writeReturnVoid(s3 -> s3.deleteBucketLifecycleConfiguration(bucketName));
+    run(() -> getDelegate().deleteBucketLifecycleConfiguration(bucketName));
   }
 
   @Override
   public void deleteBucketLifecycleConfiguration(DeleteBucketLifecycleConfigurationRequest deleteBucketLifecycleConfigurationRequest) {
-    writeReturnVoid(s3 -> s3.deleteBucketLifecycleConfiguration(deleteBucketLifecycleConfigurationRequest));
+    run(() -> getDelegate().deleteBucketLifecycleConfiguration(deleteBucketLifecycleConfigurationRequest));
   }
 
   @Override
   public BucketCrossOriginConfiguration getBucketCrossOriginConfiguration(String bucketName) {
-    return read(s3 -> s3.getBucketCrossOriginConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketCrossOriginConfiguration(bucketName));
   }
 
   @Override
   public BucketCrossOriginConfiguration getBucketCrossOriginConfiguration(GetBucketCrossOriginConfigurationRequest getBucketCrossOriginConfigurationRequest) {
-    return read(s3 -> s3.getBucketCrossOriginConfiguration(getBucketCrossOriginConfigurationRequest));
+    return call(() -> getDelegate().getBucketCrossOriginConfiguration(getBucketCrossOriginConfigurationRequest));
   }
 
   @Override
   public void setBucketCrossOriginConfiguration(String bucketName, BucketCrossOriginConfiguration bucketCrossOriginConfiguration) {
-    writeReturnVoid(s3 -> s3.setBucketCrossOriginConfiguration(bucketName, bucketCrossOriginConfiguration));
+    run(() -> getDelegate().setBucketCrossOriginConfiguration(bucketName, bucketCrossOriginConfiguration));
   }
 
   @Override
   public void setBucketCrossOriginConfiguration(SetBucketCrossOriginConfigurationRequest setBucketCrossOriginConfigurationRequest) {
-    writeReturnVoid(s3 -> s3.setBucketCrossOriginConfiguration(setBucketCrossOriginConfigurationRequest));
+    run(() -> getDelegate().setBucketCrossOriginConfiguration(setBucketCrossOriginConfigurationRequest));
   }
 
   @Override
   public void deleteBucketCrossOriginConfiguration(String bucketName) {
-    writeReturnVoid(s3 -> s3.deleteBucketCrossOriginConfiguration(bucketName));
+    run(() -> getDelegate().deleteBucketCrossOriginConfiguration(bucketName));
   }
 
   @Override
   public void deleteBucketCrossOriginConfiguration(DeleteBucketCrossOriginConfigurationRequest deleteBucketCrossOriginConfigurationRequest) {
-    writeReturnVoid(s3 -> s3.deleteBucketCrossOriginConfiguration(deleteBucketCrossOriginConfigurationRequest));
+    run(() -> getDelegate().deleteBucketCrossOriginConfiguration(deleteBucketCrossOriginConfigurationRequest));
   }
 
   @Override
   public BucketTaggingConfiguration getBucketTaggingConfiguration(String bucketName) {
-    return read(s3 -> s3.getBucketTaggingConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketTaggingConfiguration(bucketName));
   }
 
   @Override
   public BucketTaggingConfiguration getBucketTaggingConfiguration(GetBucketTaggingConfigurationRequest getBucketTaggingConfigurationRequest) {
-    return read(s3 -> s3.getBucketTaggingConfiguration(getBucketTaggingConfigurationRequest));
+    return call(() -> getDelegate().getBucketTaggingConfiguration(getBucketTaggingConfigurationRequest));
   }
 
   @Override
   public void setBucketTaggingConfiguration(String bucketName, BucketTaggingConfiguration bucketTaggingConfiguration) {
-    writeReturnVoid(s3 -> s3.setBucketTaggingConfiguration(bucketName, bucketTaggingConfiguration));
+    run(() -> getDelegate().setBucketTaggingConfiguration(bucketName, bucketTaggingConfiguration));
   }
 
   @Override
   public void setBucketTaggingConfiguration(SetBucketTaggingConfigurationRequest setBucketTaggingConfigurationRequest) {
-    writeReturnVoid(s3 -> s3.setBucketTaggingConfiguration(setBucketTaggingConfigurationRequest));
+    run(() -> getDelegate().setBucketTaggingConfiguration(setBucketTaggingConfigurationRequest));
   }
 
   @Override
   public void deleteBucketTaggingConfiguration(String bucketName) {
-    writeReturnVoid(s3 -> s3.deleteBucketTaggingConfiguration(bucketName));
+    run(() -> getDelegate().deleteBucketTaggingConfiguration(bucketName));
   }
 
   @Override
   public void deleteBucketTaggingConfiguration(DeleteBucketTaggingConfigurationRequest deleteBucketTaggingConfigurationRequest) {
-    writeReturnVoid(s3 -> s3.deleteBucketTaggingConfiguration(deleteBucketTaggingConfigurationRequest));
+    run(() -> getDelegate().deleteBucketTaggingConfiguration(deleteBucketTaggingConfigurationRequest));
   }
 
   @Override
   public BucketNotificationConfiguration getBucketNotificationConfiguration(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketNotificationConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketNotificationConfiguration(bucketName));
   }
 
   @Override
   public BucketNotificationConfiguration getBucketNotificationConfiguration(GetBucketNotificationConfigurationRequest getBucketNotificationConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketNotificationConfiguration(getBucketNotificationConfigurationRequest));
+    return call(() -> getDelegate().getBucketNotificationConfiguration(getBucketNotificationConfigurationRequest));
   }
 
   @Override
   public void setBucketNotificationConfiguration(String bucketName, BucketNotificationConfiguration bucketNotificationConfiguration) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketNotificationConfiguration(bucketName, bucketNotificationConfiguration));
+    run(() -> getDelegate().setBucketNotificationConfiguration(bucketName, bucketNotificationConfiguration));
   }
 
   @Override
   public void setBucketNotificationConfiguration(SetBucketNotificationConfigurationRequest setBucketNotificationConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketNotificationConfiguration(setBucketNotificationConfigurationRequest));
+    run(() -> getDelegate().setBucketNotificationConfiguration(setBucketNotificationConfigurationRequest));
   }
 
   @Override
   public BucketWebsiteConfiguration getBucketWebsiteConfiguration(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketWebsiteConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketWebsiteConfiguration(bucketName));
   }
 
   @Override
   public BucketWebsiteConfiguration getBucketWebsiteConfiguration(GetBucketWebsiteConfigurationRequest getBucketWebsiteConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketWebsiteConfiguration(getBucketWebsiteConfigurationRequest));
+    return call(() -> getDelegate().getBucketWebsiteConfiguration(getBucketWebsiteConfigurationRequest));
   }
 
   @Override
   public void setBucketWebsiteConfiguration(String bucketName, BucketWebsiteConfiguration configuration) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketWebsiteConfiguration(bucketName, configuration));
+    run(() -> getDelegate().setBucketWebsiteConfiguration(bucketName, configuration));
   }
 
   @Override
   public void setBucketWebsiteConfiguration(SetBucketWebsiteConfigurationRequest setBucketWebsiteConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketWebsiteConfiguration(setBucketWebsiteConfigurationRequest));
+    run(() -> getDelegate().setBucketWebsiteConfiguration(setBucketWebsiteConfigurationRequest));
   }
 
   @Override
   public void deleteBucketWebsiteConfiguration(String bucketName) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucketWebsiteConfiguration(bucketName));
+    run(() -> getDelegate().deleteBucketWebsiteConfiguration(bucketName));
   }
 
   @Override
   public void deleteBucketWebsiteConfiguration(DeleteBucketWebsiteConfigurationRequest deleteBucketWebsiteConfigurationRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucketWebsiteConfiguration(deleteBucketWebsiteConfigurationRequest));
+    run(() -> getDelegate().deleteBucketWebsiteConfiguration(deleteBucketWebsiteConfigurationRequest));
   }
 
   @Override
   public BucketPolicy getBucketPolicy(String bucketName) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketPolicy(bucketName));
+    return call(() -> getDelegate().getBucketPolicy(bucketName));
   }
 
   @Override
   public BucketPolicy getBucketPolicy(GetBucketPolicyRequest getBucketPolicyRequest) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.getBucketPolicy(getBucketPolicyRequest));
+    return call(() -> getDelegate().getBucketPolicy(getBucketPolicyRequest));
   }
 
   @Override
   public void setBucketPolicy(String bucketName, String policyText) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketPolicy(bucketName, policyText));
+    run(() -> getDelegate().setBucketPolicy(bucketName, policyText));
   }
 
   @Override
   public void setBucketPolicy(SetBucketPolicyRequest setBucketPolicyRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketPolicy(setBucketPolicyRequest));
+    run(() -> getDelegate().setBucketPolicy(setBucketPolicyRequest));
   }
 
   @Override
   public void deleteBucketPolicy(String bucketName) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucketPolicy(bucketName));
+    run(() -> getDelegate().deleteBucketPolicy(bucketName));
   }
 
   @Override
   public void deleteBucketPolicy(DeleteBucketPolicyRequest deleteBucketPolicyRequest) throws SdkClientException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucketPolicy(deleteBucketPolicyRequest));
+    run(() -> getDelegate().deleteBucketPolicy(deleteBucketPolicyRequest));
   }
 
   @Override
   public URL generatePresignedUrl(String bucketName, String key, Date expiration) throws SdkClientException {
-    return read(s3 -> s3.generatePresignedUrl(bucketName, key, expiration));
+    return call(() -> getDelegate().generatePresignedUrl(bucketName, key, expiration));
   }
 
   @Override
   public URL generatePresignedUrl(String bucketName, String key, Date expiration, HttpMethod method) throws SdkClientException {
-    return read(s3 -> s3.generatePresignedUrl(bucketName, key, expiration, method));
+    return call(() -> getDelegate().generatePresignedUrl(bucketName, key, expiration, method));
   }
 
   @Override
   public URL generatePresignedUrl(GeneratePresignedUrlRequest generatePresignedUrlRequest) throws SdkClientException {
-    return read(s3 -> s3.generatePresignedUrl(generatePresignedUrlRequest));
+    return call(() -> getDelegate().generatePresignedUrl(generatePresignedUrlRequest));
   }
 
   @Override
   public InitiateMultipartUploadResult initiateMultipartUpload(InitiateMultipartUploadRequest request) {
-    return write(s3 -> s3.initiateMultipartUpload(request));
+    return call(() -> getDelegate().initiateMultipartUpload(request));
   }
 
   @Override
   public UploadPartResult uploadPart(UploadPartRequest request) {
-    return write(s3 -> s3.uploadPart(request));
+    return call(() -> getDelegate().uploadPart(request));
   }
 
   @Override
   public PartListing listParts(ListPartsRequest request) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listParts(request));
+    return call(() -> getDelegate().listParts(request));
   }
 
   @Override
   public void abortMultipartUpload(AbortMultipartUploadRequest request) {
-    writeReturnVoid(s3 -> s3.abortMultipartUpload(request));
+    run(() -> getDelegate().abortMultipartUpload(request));
   }
 
   @Override
   public CompleteMultipartUploadResult completeMultipartUpload(CompleteMultipartUploadRequest request) {
-    return write(s3 -> s3.completeMultipartUpload(request));
+    return call(() -> getDelegate().completeMultipartUpload(request));
   }
 
   @Override
   public MultipartUploadListing listMultipartUploads(ListMultipartUploadsRequest request) throws SdkClientException, AmazonServiceException {
-    return read(s3 -> s3.listMultipartUploads(request));
+    return call(() -> getDelegate().listMultipartUploads(request));
   }
 
   @Override
   public S3ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
-    return read(s3 -> s3.getCachedResponseMetadata(request));
+    return getDelegate().getCachedResponseMetadata(request);
   }
 
   @Override
   public void restoreObject(String bucketName, String key, int expirationInDays) throws AmazonServiceException {
-    writeReturnVoid(s3 -> s3.restoreObject(bucketName, key, expirationInDays));
+    run(() -> getDelegate().restoreObject(bucketName, key, expirationInDays));
   }
 
   @Override
   public void restoreObject(RestoreObjectRequest request) throws AmazonServiceException {
-    writeReturnVoid(s3 -> s3.restoreObject(request));
+    run(() -> getDelegate().restoreObject(request));
   }
 
   @Override
   public void enableRequesterPays(String bucketName) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.enableRequesterPays(bucketName));
+    run(() -> getDelegate().enableRequesterPays(bucketName));
   }
 
   @Override
   public void disableRequesterPays(String bucketName) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.disableRequesterPays(bucketName));
+    run(() -> getDelegate().disableRequesterPays(bucketName));
   }
 
   @Override
   public boolean isRequesterPaysEnabled(String bucketName) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.isRequesterPaysEnabled(bucketName));
+    return call(() -> getDelegate().isRequesterPaysEnabled(bucketName));
   }
 
   @Override
   public void setBucketReplicationConfiguration(String bucketName, BucketReplicationConfiguration configuration) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketReplicationConfiguration(bucketName, configuration));
+    run(() -> getDelegate().setBucketReplicationConfiguration(bucketName, configuration));
   }
 
   @Override
   public void setBucketReplicationConfiguration(SetBucketReplicationConfigurationRequest setBucketReplicationConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketReplicationConfiguration(setBucketReplicationConfigurationRequest));
+    run(() -> getDelegate().setBucketReplicationConfiguration(setBucketReplicationConfigurationRequest));
   }
 
   @Override
   public BucketReplicationConfiguration getBucketReplicationConfiguration(String bucketName) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketReplicationConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketReplicationConfiguration(bucketName));
   }
 
   @Override
   public BucketReplicationConfiguration getBucketReplicationConfiguration(GetBucketReplicationConfigurationRequest getBucketReplicationConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketReplicationConfiguration(getBucketReplicationConfigurationRequest));
+    return call(() -> getDelegate().getBucketReplicationConfiguration(getBucketReplicationConfigurationRequest));
   }
 
   @Override
   public void deleteBucketReplicationConfiguration(String bucketName) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucketReplicationConfiguration(bucketName));
+    run(() -> getDelegate().deleteBucketReplicationConfiguration(bucketName));
   }
 
   @Override
   public void deleteBucketReplicationConfiguration(DeleteBucketReplicationConfigurationRequest request) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.deleteBucketReplicationConfiguration(request));
+    run(() -> getDelegate().deleteBucketReplicationConfiguration(request));
   }
 
   @Override
   public boolean doesObjectExist(String bucketName, String objectName) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.doesObjectExist(bucketName, objectName));
+    return call(() -> getDelegate().doesObjectExist(bucketName, objectName));
   }
 
   @Override
   public BucketAccelerateConfiguration getBucketAccelerateConfiguration(String bucketName) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketAccelerateConfiguration(bucketName));
+    return call(() -> getDelegate().getBucketAccelerateConfiguration(bucketName));
   }
 
   @Override
   public BucketAccelerateConfiguration getBucketAccelerateConfiguration(GetBucketAccelerateConfigurationRequest getBucketAccelerateConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketAccelerateConfiguration(getBucketAccelerateConfigurationRequest));
+    return call(() -> getDelegate().getBucketAccelerateConfiguration(getBucketAccelerateConfigurationRequest));
   }
 
   @Override
   public void setBucketAccelerateConfiguration(String bucketName, BucketAccelerateConfiguration accelerateConfiguration) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketAccelerateConfiguration(bucketName, accelerateConfiguration));
+    run(() -> getDelegate().setBucketAccelerateConfiguration(bucketName, accelerateConfiguration));
   }
 
   @Override
   public void setBucketAccelerateConfiguration(SetBucketAccelerateConfigurationRequest setBucketAccelerateConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    writeReturnVoid(s3 -> s3.setBucketAccelerateConfiguration(setBucketAccelerateConfigurationRequest));
+    run(() -> getDelegate().setBucketAccelerateConfiguration(setBucketAccelerateConfigurationRequest));
   }
 
   @Override
   public DeleteBucketMetricsConfigurationResult deleteBucketMetricsConfiguration(String bucketName, String id) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.deleteBucketMetricsConfiguration(bucketName, id));
+    return call(() -> getDelegate().deleteBucketMetricsConfiguration(bucketName, id));
   }
 
   @Override
   public DeleteBucketMetricsConfigurationResult deleteBucketMetricsConfiguration(DeleteBucketMetricsConfigurationRequest deleteBucketMetricsConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.deleteBucketMetricsConfiguration(deleteBucketMetricsConfigurationRequest));
+    return call(() -> getDelegate().deleteBucketMetricsConfiguration(deleteBucketMetricsConfigurationRequest));
   }
 
   @Override
   public GetBucketMetricsConfigurationResult getBucketMetricsConfiguration(String bucketName, String id) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketMetricsConfiguration(bucketName, id));
+    return call(() -> getDelegate().getBucketMetricsConfiguration(bucketName, id));
   }
 
   @Override
   public GetBucketMetricsConfigurationResult getBucketMetricsConfiguration(GetBucketMetricsConfigurationRequest getBucketMetricsConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketMetricsConfiguration(getBucketMetricsConfigurationRequest));
+    return call(() -> getDelegate().getBucketMetricsConfiguration(getBucketMetricsConfigurationRequest));
   }
 
   @Override
   public SetBucketMetricsConfigurationResult setBucketMetricsConfiguration(String bucketName, MetricsConfiguration metricsConfiguration) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.setBucketMetricsConfiguration(bucketName, metricsConfiguration));
+    return call(() -> getDelegate().setBucketMetricsConfiguration(bucketName, metricsConfiguration));
   }
 
   @Override
   public SetBucketMetricsConfigurationResult setBucketMetricsConfiguration(SetBucketMetricsConfigurationRequest setBucketMetricsConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.setBucketMetricsConfiguration(setBucketMetricsConfigurationRequest));
+    return call(() -> getDelegate().setBucketMetricsConfiguration(setBucketMetricsConfigurationRequest));
   }
 
   @Override
   public ListBucketMetricsConfigurationsResult listBucketMetricsConfigurations(ListBucketMetricsConfigurationsRequest listBucketMetricsConfigurationsRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.listBucketMetricsConfigurations(listBucketMetricsConfigurationsRequest));
+    return call(() -> getDelegate().listBucketMetricsConfigurations(listBucketMetricsConfigurationsRequest));
   }
 
   @Override
   public DeleteBucketAnalyticsConfigurationResult deleteBucketAnalyticsConfiguration(String bucketName, String id) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.deleteBucketAnalyticsConfiguration(bucketName, id));
+    return call(() -> getDelegate().deleteBucketAnalyticsConfiguration(bucketName, id));
   }
 
   @Override
   public DeleteBucketAnalyticsConfigurationResult deleteBucketAnalyticsConfiguration(DeleteBucketAnalyticsConfigurationRequest deleteBucketAnalyticsConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.deleteBucketAnalyticsConfiguration(deleteBucketAnalyticsConfigurationRequest));
+    return call(() -> getDelegate().deleteBucketAnalyticsConfiguration(deleteBucketAnalyticsConfigurationRequest));
   }
 
   @Override
   public GetBucketAnalyticsConfigurationResult getBucketAnalyticsConfiguration(String bucketName, String id) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketAnalyticsConfiguration(bucketName, id));
+    return call(() -> getDelegate().getBucketAnalyticsConfiguration(bucketName, id));
   }
 
   @Override
   public GetBucketAnalyticsConfigurationResult getBucketAnalyticsConfiguration(GetBucketAnalyticsConfigurationRequest getBucketAnalyticsConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketAnalyticsConfiguration(getBucketAnalyticsConfigurationRequest));
+    return call(() -> getDelegate().getBucketAnalyticsConfiguration(getBucketAnalyticsConfigurationRequest));
   }
 
   @Override
   public SetBucketAnalyticsConfigurationResult setBucketAnalyticsConfiguration(String bucketName, AnalyticsConfiguration analyticsConfiguration) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.setBucketAnalyticsConfiguration(bucketName, analyticsConfiguration));
+    return call(() -> getDelegate().setBucketAnalyticsConfiguration(bucketName, analyticsConfiguration));
   }
 
   @Override
   public SetBucketAnalyticsConfigurationResult setBucketAnalyticsConfiguration(SetBucketAnalyticsConfigurationRequest setBucketAnalyticsConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.setBucketAnalyticsConfiguration(setBucketAnalyticsConfigurationRequest));
+    return call(() -> getDelegate().setBucketAnalyticsConfiguration(setBucketAnalyticsConfigurationRequest));
   }
 
   @Override
   public ListBucketAnalyticsConfigurationsResult listBucketAnalyticsConfigurations(ListBucketAnalyticsConfigurationsRequest listBucketAnalyticsConfigurationsRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.listBucketAnalyticsConfigurations(listBucketAnalyticsConfigurationsRequest));
+    return call(() -> getDelegate().listBucketAnalyticsConfigurations(listBucketAnalyticsConfigurationsRequest));
   }
 
   @Override
   public DeleteBucketInventoryConfigurationResult deleteBucketInventoryConfiguration(String bucketName, String id) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.deleteBucketInventoryConfiguration(bucketName, id));
+    return call(() -> getDelegate().deleteBucketInventoryConfiguration(bucketName, id));
   }
 
   @Override
   public DeleteBucketInventoryConfigurationResult deleteBucketInventoryConfiguration(DeleteBucketInventoryConfigurationRequest deleteBucketInventoryConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.deleteBucketInventoryConfiguration(deleteBucketInventoryConfigurationRequest));
+    return call(() -> getDelegate().deleteBucketInventoryConfiguration(deleteBucketInventoryConfigurationRequest));
   }
 
   @Override
   public GetBucketInventoryConfigurationResult getBucketInventoryConfiguration(String bucketName, String id) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketInventoryConfiguration(bucketName, id));
+    return call(() -> getDelegate().getBucketInventoryConfiguration(bucketName, id));
   }
 
   @Override
   public GetBucketInventoryConfigurationResult getBucketInventoryConfiguration(GetBucketInventoryConfigurationRequest getBucketInventoryConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.getBucketInventoryConfiguration(getBucketInventoryConfigurationRequest));
+    return call(() -> getDelegate().getBucketInventoryConfiguration(getBucketInventoryConfigurationRequest));
   }
 
   @Override
   public SetBucketInventoryConfigurationResult setBucketInventoryConfiguration(String bucketName, InventoryConfiguration inventoryConfiguration) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.setBucketInventoryConfiguration(bucketName, inventoryConfiguration));
+    return call(() -> getDelegate().setBucketInventoryConfiguration(bucketName, inventoryConfiguration));
   }
 
   @Override
   public SetBucketInventoryConfigurationResult setBucketInventoryConfiguration(SetBucketInventoryConfigurationRequest setBucketInventoryConfigurationRequest) throws AmazonServiceException, AmazonServiceException {
-    return write(s3 -> s3.setBucketInventoryConfiguration(setBucketInventoryConfigurationRequest));
+    return call(() -> getDelegate().setBucketInventoryConfiguration(setBucketInventoryConfigurationRequest));
   }
 
   @Override
   public ListBucketInventoryConfigurationsResult listBucketInventoryConfigurations(ListBucketInventoryConfigurationsRequest listBucketInventoryConfigurationsRequest) throws AmazonServiceException, AmazonServiceException {
-    return read(s3 -> s3.listBucketInventoryConfigurations(listBucketInventoryConfigurationsRequest));
+    return call(() -> getDelegate().listBucketInventoryConfigurations(listBucketInventoryConfigurationsRequest));
   }
 
   @Override
   public com.amazonaws.services.s3.model.Region getRegion() {
-    return read(AmazonS3::getRegion);
+    return getDelegate().getRegion();
   }
 
   @Override
   public String getRegionName() {
-    return read(AmazonS3::getRegionName);
+    return getDelegate().getRegionName();
   }
 
   @Override
   public URL getUrl(String bucketName, String key) {
-    return read(s3 -> s3.getUrl(bucketName, key));
+    return getDelegate().getUrl(bucketName, key);
   }
 
   @Override
   public AmazonS3Waiters waiters() {
-    return read(AmazonS3::waiters);
+    return getDelegate().waiters();
   }
 }
