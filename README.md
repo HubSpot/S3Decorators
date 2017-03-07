@@ -16,7 +16,7 @@ To implement your own decorator, you can add the following dependency:
 <dependency>
   <groupId>com.hubspot</groupId>
   <artifactId>s3-decorators-core</artifactId>
-  <version>0.6</version>
+  <version>0.7</version>
 </dependency>
 ```
 
@@ -30,7 +30,7 @@ You can use the `HystrixS3Decorator` in order to easily wrap all S3 calls in a H
 <dependency>
   <groupId>com.hubspot</groupId>
   <artifactId>hystrix-s3-decorator</artifactId>
-  <version>0.6</version>
+  <version>0.7</version>
 </dependency>
 ```
 
@@ -49,14 +49,6 @@ Setter setter = ... // construct desired Setter
 return HystrixS3Decorator.decorate(s3, setter);
 ```
 
-You can also provide a fallback for reads, writes, or both. This could be used in conjunction with cross-region replication to continue serving reads in the event of an outage. For example:
-
-```java
-AmazonS3 s3 = ... // construct client normally
-AmazonS3 fallback = ... // pointed at replicated bucket in different region
-return HystrixS3Decorator.decorate(s3).withReadFallback(fallback);
-```
-
 ## Failsafe
 
 You can use the `FailsafeS3Decorator` in order to easily wrap all S3 calls with a Failsafe circuit-breaker. Use the following Maven dependency:
@@ -65,7 +57,7 @@ You can use the `FailsafeS3Decorator` in order to easily wrap all S3 calls with 
 <dependency>
   <groupId>com.hubspot</groupId>
   <artifactId>failsafe-s3-decorator</artifactId>
-  <version>0.6</version>
+  <version>0.7</version>
 </dependency>
 ```
 
@@ -84,14 +76,6 @@ CircuitBreaker circuitBreaker = ... // construct desired CircuitBreaker
 return FailsafeS3Decorator.decorate(s3, circuitBreaker);
 ```
 
-You can also provide a fallback for reads, writes, or both. This could be used in conjunction with cross-region replication to continue serving reads in the event of an outage. For example:
-
-```java
-AmazonS3 s3 = ... // construct client normally
-AmazonS3 fallback = ... // pointed at replicated bucket in different region
-return FailsafeS3Decorator.decorate(s3).withReadFallback(fallback);
-```
-
 ## Metrics
 
 If your app uses Dropwizard Metrics, you can use the `MetricsS3Decorator` in order to easily capture S3 call durations and failure rates. Use the following Maven dependency:
@@ -100,7 +84,7 @@ If your app uses Dropwizard Metrics, you can use the `MetricsS3Decorator` in ord
 <dependency>
   <groupId>com.hubspot</groupId>
   <artifactId>metrics-s3-decorator</artifactId>
-  <version>0.6</version>
+  <version>0.7</version>
 </dependency>
 ```
 
@@ -112,10 +96,8 @@ MetricRegistry registry = ... // the desired metric registry
 return MetricsS3Decorator.decorate(s3, registry);
 ```
 
-This will create two timers: 
-- `com.hubspot.s3.metrics.MetricsS3Decorator.reads`
-- `com.hubspot.s3.metrics.MetricsS3Decorator.writes`
+This will create a timer for request duration: 
+- `com.hubspot.s3.metrics.MetricsS3Decorator.requests`
 
-As well as two meters:
-- `com.hubspot.s3.metrics.MetricsS3Decorator.readExceptions`
-- `com.hubspot.s3.metrics.MetricsS3Decorator.writeExceptions`
+As well a meter for exceptions:
+- `com.hubspot.s3.metrics.MetricsS3Decorator.exceptions`
