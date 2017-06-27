@@ -109,7 +109,7 @@ public class HystrixS3DecoratorTest {
 
     @Override
     public String getRegionName() {
-      return "missing";
+      return "bad auth";
     }
 
     @Override
