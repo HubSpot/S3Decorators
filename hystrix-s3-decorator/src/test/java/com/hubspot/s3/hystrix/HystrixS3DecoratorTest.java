@@ -58,6 +58,21 @@ public class HystrixS3DecoratorTest {
     }
   }
 
+  @Test
+  public void itDoesntCount403AsFailure() throws InterruptedException {
+    AmazonS3 s3 = HystrixS3Decorator.decorate(new NotAuthedS3Client());
+
+    for (int i = 0; i < 100; i++ ) {
+      try {
+        s3.getObjectMetadata("test-bucket", "test-key");
+      } catch (AmazonServiceException e) {
+        assertThat(e.getStatusCode()).isEqualTo(403);
+      }
+
+      Thread.sleep(50);
+    }
+  }
+
   private static class FailingS3Client extends AbstractAmazonS3 {
 
     @Override
@@ -85,6 +100,22 @@ public class HystrixS3DecoratorTest {
     public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonServiceException {
       AmazonS3Exception exception = new AmazonS3Exception("Not Found");
       exception.setStatusCode(404);
+      exception.setErrorType(ErrorType.Client);
+      throw exception;
+    }
+  }
+
+  private static class NotAuthedS3Client extends AbstractAmazonS3 {
+
+    @Override
+    public String getRegionName() {
+      return "missing";
+    }
+
+    @Override
+    public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonServiceException {
+      AmazonS3Exception exception = new AmazonS3Exception("Bad Auth");
+      exception.setStatusCode(403);
       exception.setErrorType(ErrorType.Client);
       throw exception;
     }

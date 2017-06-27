@@ -85,7 +85,7 @@ public class HystrixS3Decorator extends S3Decorator {
         return callable.get();
       } catch (AmazonServiceException e) {
         // don't count 404 as failure
-        if (is404(e)) {
+        if (is403or404(e)) {
           throw new HystrixBadRequestException(e.getMessage(), e);
         } else {
           throw e;

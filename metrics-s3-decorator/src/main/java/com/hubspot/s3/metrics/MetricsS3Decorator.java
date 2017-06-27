@@ -35,7 +35,7 @@ public class MetricsS3Decorator extends S3Decorator {
     try (Context context = requestTimer.time()) {
       return callable.get();
     } catch (AmazonServiceException e) {
-      if (!is404(e)) {
+      if (!is403or404(e)) {
         exceptionMeter.mark();
       }
 
