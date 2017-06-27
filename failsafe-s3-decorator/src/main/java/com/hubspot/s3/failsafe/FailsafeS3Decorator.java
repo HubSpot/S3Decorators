@@ -37,7 +37,7 @@ public class FailsafeS3Decorator extends S3Decorator {
   }
 
   private static CircuitBreaker defaultCircuitBreaker() {
-    return new CircuitBreaker().withFailureThreshold(6, 10).withDelay(5, TimeUnit.SECONDS).failOn(t -> !is404(t));
+    return new CircuitBreaker().withFailureThreshold(6, 10).withDelay(5, TimeUnit.SECONDS).failOn(t -> !is403or404(t));
   }
 
   private static <T> T checkNotNull(T value, String parameterName) {

@@ -149,8 +149,15 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
     });
   }
 
-  protected static boolean is404(Throwable t) {
-    return t instanceof AmazonServiceException && ((AmazonServiceException) t).getStatusCode() == 404;
+  protected static boolean is403or404(Throwable t) {
+    boolean isServiceException = t instanceof AmazonServiceException;
+
+    if (!isServiceException) {
+      return false;
+    }
+
+    int statusCode = ((AmazonServiceException) t).getStatusCode();
+    return statusCode == 403 || statusCode == 404;
   }
 
   @Override
