@@ -5,17 +5,12 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>15.8</version>
+    <version>25.3</version>
   </parent>
 
   <artifactId>s3-decorators</artifactId>
   <version>0.9-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <properties>
-    <project.build.targetJdk>1.8</project.build.targetJdk>
-    <aws.sdk.version>1.11.98</aws.sdk.version>
-  </properties>
 
   <modules>
     <module>s3-decorators-core</module>
@@ -23,6 +18,12 @@
     <module>failsafe-s3-decorator</module>
     <module>metrics-s3-decorator</module>
   </modules>
+
+  <properties>
+    <aws.sdk.version>1.11.461</aws.sdk.version>
+    <dep.httpclient.version>4.5.5</dep.httpclient.version>
+    <dep.httpcore.version>4.4.9</dep.httpcore.version>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
