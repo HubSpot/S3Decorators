@@ -20,9 +20,10 @@
   </modules>
 
   <properties>
-    <aws.sdk.version>1.11.461</aws.sdk.version>
-    <dep.httpclient.version>4.5.5</dep.httpclient.version>
-    <dep.httpcore.version>4.4.9</dep.httpcore.version>
+    <aws.sdk.version>1.11.628</aws.sdk.version>
+    <dep.httpclient.version>4.5.9</dep.httpclient.version>
+    <dep.httpcore.version>4.4.11</dep.httpcore.version>
+    <dep.commons-codec.version>1.11</dep.commons-codec.version>
   </properties>
 
   <dependencyManagement>
@@ -35,12 +36,12 @@
       <dependency>
         <groupId>com.hubspot</groupId>
         <artifactId>hystrix-s3-decorator</artifactId>
-        <version>${project.version</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.hubspot</groupId>
         <artifactId>metrics-s3-decorator</artifactId>
-        <version>${project.version</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.netflix.hystrix</groupId>

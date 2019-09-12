@@ -121,6 +121,10 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.Owner;
 import com.amazonaws.services.s3.model.PartListing;
+import com.amazonaws.services.s3.model.PresignedUrlDownloadRequest;
+import com.amazonaws.services.s3.model.PresignedUrlDownloadResult;
+import com.amazonaws.services.s3.model.PresignedUrlUploadRequest;
+import com.amazonaws.services.s3.model.PresignedUrlUploadResult;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.RestoreObjectRequest;
@@ -1062,5 +1066,20 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
   @Override
   public GetObjectRetentionResult getObjectRetention(GetObjectRetentionRequest getObjectRetentionRequest) {
     return call(() -> getDelegate().getObjectRetention(getObjectRetentionRequest));
+  }
+
+  @Override
+  public PresignedUrlDownloadResult download(PresignedUrlDownloadRequest presignedUrlDownloadRequest) {
+    return call(() -> getDelegate().download(presignedUrlDownloadRequest));
+  }
+
+  @Override
+  public void download(PresignedUrlDownloadRequest presignedUrlDownloadRequest, File destinationFile) {
+    run(() -> getDelegate().download(presignedUrlDownloadRequest, destinationFile));
+  }
+
+  @Override
+  public PresignedUrlUploadResult upload(PresignedUrlUploadRequest presignedUrlUploadRequest) {
+    return call(() -> getDelegate().upload(presignedUrlUploadRequest));
   }
 }
