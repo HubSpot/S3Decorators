@@ -40,6 +40,8 @@ import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.DeleteBucketAnalyticsConfigurationRequest;
 import com.amazonaws.services.s3.model.DeleteBucketAnalyticsConfigurationResult;
 import com.amazonaws.services.s3.model.DeleteBucketCrossOriginConfigurationRequest;
+import com.amazonaws.services.s3.model.DeleteBucketEncryptionRequest;
+import com.amazonaws.services.s3.model.DeleteBucketEncryptionResult;
 import com.amazonaws.services.s3.model.DeleteBucketInventoryConfigurationRequest;
 import com.amazonaws.services.s3.model.DeleteBucketInventoryConfigurationResult;
 import com.amazonaws.services.s3.model.DeleteBucketLifecycleConfigurationRequest;
@@ -55,6 +57,8 @@ import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
 import com.amazonaws.services.s3.model.DeleteObjectTaggingResult;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsResult;
+import com.amazonaws.services.s3.model.DeletePublicAccessBlockRequest;
+import com.amazonaws.services.s3.model.DeletePublicAccessBlockResult;
 import com.amazonaws.services.s3.model.DeleteVersionRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
@@ -62,6 +66,8 @@ import com.amazonaws.services.s3.model.GetBucketAclRequest;
 import com.amazonaws.services.s3.model.GetBucketAnalyticsConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketAnalyticsConfigurationResult;
 import com.amazonaws.services.s3.model.GetBucketCrossOriginConfigurationRequest;
+import com.amazonaws.services.s3.model.GetBucketEncryptionRequest;
+import com.amazonaws.services.s3.model.GetBucketEncryptionResult;
 import com.amazonaws.services.s3.model.GetBucketInventoryConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketInventoryConfigurationResult;
 import com.amazonaws.services.s3.model.GetBucketLifecycleConfigurationRequest;
@@ -71,15 +77,25 @@ import com.amazonaws.services.s3.model.GetBucketMetricsConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketMetricsConfigurationResult;
 import com.amazonaws.services.s3.model.GetBucketNotificationConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketPolicyRequest;
+import com.amazonaws.services.s3.model.GetBucketPolicyStatusRequest;
+import com.amazonaws.services.s3.model.GetBucketPolicyStatusResult;
 import com.amazonaws.services.s3.model.GetBucketReplicationConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketTaggingConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketVersioningConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketWebsiteConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectAclRequest;
+import com.amazonaws.services.s3.model.GetObjectLegalHoldRequest;
+import com.amazonaws.services.s3.model.GetObjectLegalHoldResult;
+import com.amazonaws.services.s3.model.GetObjectLockConfigurationRequest;
+import com.amazonaws.services.s3.model.GetObjectLockConfigurationResult;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectRetentionRequest;
+import com.amazonaws.services.s3.model.GetObjectRetentionResult;
 import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.GetObjectTaggingResult;
+import com.amazonaws.services.s3.model.GetPublicAccessBlockRequest;
+import com.amazonaws.services.s3.model.GetPublicAccessBlockResult;
 import com.amazonaws.services.s3.model.GetS3AccountOwnerRequest;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.HeadBucketResult;
@@ -108,12 +124,17 @@ import com.amazonaws.services.s3.model.PartListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.RestoreObjectRequest;
+import com.amazonaws.services.s3.model.RestoreObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.SelectObjectContentRequest;
+import com.amazonaws.services.s3.model.SelectObjectContentResult;
 import com.amazonaws.services.s3.model.SetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketAclRequest;
 import com.amazonaws.services.s3.model.SetBucketAnalyticsConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketAnalyticsConfigurationResult;
 import com.amazonaws.services.s3.model.SetBucketCrossOriginConfigurationRequest;
+import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
+import com.amazonaws.services.s3.model.SetBucketEncryptionResult;
 import com.amazonaws.services.s3.model.SetBucketInventoryConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketInventoryConfigurationResult;
 import com.amazonaws.services.s3.model.SetBucketLifecycleConfigurationRequest;
@@ -127,8 +148,16 @@ import com.amazonaws.services.s3.model.SetBucketTaggingConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketWebsiteConfigurationRequest;
 import com.amazonaws.services.s3.model.SetObjectAclRequest;
+import com.amazonaws.services.s3.model.SetObjectLegalHoldRequest;
+import com.amazonaws.services.s3.model.SetObjectLegalHoldResult;
+import com.amazonaws.services.s3.model.SetObjectLockConfigurationRequest;
+import com.amazonaws.services.s3.model.SetObjectLockConfigurationResult;
+import com.amazonaws.services.s3.model.SetObjectRetentionRequest;
+import com.amazonaws.services.s3.model.SetObjectRetentionResult;
 import com.amazonaws.services.s3.model.SetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.SetObjectTaggingResult;
+import com.amazonaws.services.s3.model.SetPublicAccessBlockRequest;
+import com.amazonaws.services.s3.model.SetPublicAccessBlockResult;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
@@ -943,5 +972,95 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
   @Override
   public AmazonS3Waiters waiters() {
     return getDelegate().waiters();
+  }
+
+  @Override
+  public DeleteBucketEncryptionResult deleteBucketEncryption(String bucketName) throws SdkClientException {
+    return call(() -> getDelegate().deleteBucketEncryption(bucketName));
+  }
+
+  @Override
+  public DeleteBucketEncryptionResult deleteBucketEncryption(DeleteBucketEncryptionRequest request) throws SdkClientException {
+    return call(() -> getDelegate().deleteBucketEncryption(request));
+  }
+
+  @Override
+  public GetBucketEncryptionResult getBucketEncryption(String bucketName) throws SdkClientException {
+    return call(() -> getDelegate().getBucketEncryption(bucketName));
+  }
+
+  @Override
+  public GetBucketEncryptionResult getBucketEncryption(GetBucketEncryptionRequest request) throws SdkClientException {
+    return call(() -> getDelegate().getBucketEncryption(request));
+  }
+
+  @Override
+  public SetBucketEncryptionResult setBucketEncryption(SetBucketEncryptionRequest request) throws SdkClientException {
+    return call(() -> getDelegate().setBucketEncryption(request));
+  }
+
+  @Override
+  public boolean doesBucketExistV2(String bucketName) throws SdkClientException, AmazonServiceException {
+    return call(() -> getDelegate().doesBucketExistV2(bucketName));
+  }
+
+  @Override
+  public RestoreObjectResult restoreObjectV2(RestoreObjectRequest request) throws AmazonServiceException {
+    return call(() -> getDelegate().restoreObjectV2(request));
+  }
+
+  @Override
+  public SetPublicAccessBlockResult setPublicAccessBlock(SetPublicAccessBlockRequest request) {
+    return call(() -> getDelegate().setPublicAccessBlock(request));
+  }
+
+  @Override
+  public GetPublicAccessBlockResult getPublicAccessBlock(GetPublicAccessBlockRequest request) {
+    return call(() -> getDelegate().getPublicAccessBlock(request));
+  }
+
+  @Override
+  public DeletePublicAccessBlockResult deletePublicAccessBlock(DeletePublicAccessBlockRequest request) {
+    return call(() -> getDelegate().deletePublicAccessBlock(request));
+  }
+
+  @Override
+  public GetBucketPolicyStatusResult getBucketPolicyStatus(GetBucketPolicyStatusRequest request) {
+    return call(() -> getDelegate().getBucketPolicyStatus(request));
+  }
+
+  @Override
+  public SelectObjectContentResult selectObjectContent(SelectObjectContentRequest selectRequest) throws AmazonServiceException, SdkClientException {
+    return call(() -> getDelegate().selectObjectContent(selectRequest));
+  }
+
+  @Override
+  public SetObjectLegalHoldResult setObjectLegalHold(SetObjectLegalHoldRequest setObjectLegalHoldRequest) {
+    return call(() -> getDelegate().setObjectLegalHold(setObjectLegalHoldRequest));
+  }
+
+  @Override
+  public GetObjectLegalHoldResult getObjectLegalHold(GetObjectLegalHoldRequest getObjectLegalHoldRequest) {
+    return call(() -> getDelegate().getObjectLegalHold(getObjectLegalHoldRequest));
+  }
+
+  @Override
+  public SetObjectLockConfigurationResult setObjectLockConfiguration(SetObjectLockConfigurationRequest setObjectLockConfigurationRequest) {
+    return call(() -> getDelegate().setObjectLockConfiguration(setObjectLockConfigurationRequest));
+  }
+
+  @Override
+  public GetObjectLockConfigurationResult getObjectLockConfiguration(GetObjectLockConfigurationRequest getObjectLockConfigurationRequest) {
+    return call(() -> getDelegate().getObjectLockConfiguration(getObjectLockConfigurationRequest));
+  }
+
+  @Override
+  public SetObjectRetentionResult setObjectRetention(SetObjectRetentionRequest setObjectRetentionRequest) {
+    return call(() -> getDelegate().setObjectRetention(setObjectRetentionRequest));
+  }
+
+  @Override
+  public GetObjectRetentionResult getObjectRetention(GetObjectRetentionRequest getObjectRetentionRequest) {
+    return call(() -> getDelegate().getObjectRetention(getObjectRetentionRequest));
   }
 }
