@@ -1082,4 +1082,9 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
   public PresignedUrlUploadResult upload(PresignedUrlUploadRequest presignedUrlUploadRequest) {
     return call(() -> getDelegate().upload(presignedUrlUploadRequest));
   }
+
+  @Override
+  public void shutdown() {
+    getDelegate().shutdown();
+  }
 }
