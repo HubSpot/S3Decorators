@@ -20,7 +20,7 @@
   </modules>
 
   <properties>
-    <aws.sdk.version>1.11.628</aws.sdk.version>
+    <aws.sdk.version>1.12.261</aws.sdk.version>
     <dep.httpclient.version>4.5.9</dep.httpclient.version>
     <dep.httpcore.version>4.4.11</dep.httpcore.version>
     <dep.commons-codec.version>1.11</dep.commons-codec.version>
