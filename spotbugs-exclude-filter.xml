@@ -1,0 +1,13 @@
+<FindBugsFilter>
+    <Match>
+        <!-- Possible noisy check? -->
+        <Class name="com.hubspot.s3.failsafe.FailsafeS3Decorator"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+    <Match>
+        <!-- Possible noisy check? -->
+        <Class name="com.hubspot.s3.hystrix.HystrixS3Decorator"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+</FindBugsFilter>
+
