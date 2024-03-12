@@ -2,6 +2,7 @@ package com.hubspot.s3.failsafe;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.hubspot.s3.S3Decorator;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import net.jodah.failsafe.CircuitBreaker;
@@ -12,6 +13,7 @@ public class FailsafeS3Decorator extends S3Decorator {
   private final AmazonS3 delegate;
   private final CircuitBreaker circuitBreaker;
 
+  @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
   private FailsafeS3Decorator(AmazonS3 delegate, CircuitBreaker circuitBreaker) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.circuitBreaker = checkNotNull(circuitBreaker, "circuitBreaker");

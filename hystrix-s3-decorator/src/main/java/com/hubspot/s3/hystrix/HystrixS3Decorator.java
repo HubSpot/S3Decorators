@@ -12,6 +12,7 @@ import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.function.Supplier;
 
 public class HystrixS3Decorator extends S3Decorator {
@@ -19,6 +20,7 @@ public class HystrixS3Decorator extends S3Decorator {
   private final AmazonS3 delegate;
   private final Setter setter;
 
+  @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
   private HystrixS3Decorator(AmazonS3 delegate, Setter setter) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.setter = checkNotNull(setter, "setter");
