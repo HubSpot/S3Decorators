@@ -1,7 +1,5 @@
 package com.hubspot.s3.hystrix;
 
-import java.util.function.Supplier;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkBaseException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -14,11 +12,15 @@ import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.function.Supplier;
 
 public class HystrixS3Decorator extends S3Decorator {
+
   private final AmazonS3 delegate;
   private final Setter setter;
 
+  @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
   private HystrixS3Decorator(AmazonS3 delegate, Setter setter) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.setter = checkNotNull(setter, "setter");
@@ -51,16 +53,21 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   private static Setter defaultSetter(AmazonS3 s3) {
-    return Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("s3"))
-        .andCommandKey(HystrixCommandKey.Factory.asKey(s3.getRegionName()))
-        .andCommandPropertiesDefaults(
-            HystrixCommandProperties.defaultSetter()
-                .withCircuitBreakerRequestVolumeThreshold(5)
-                .withExecutionTimeoutEnabled(false))
-        .andThreadPoolPropertiesDefaults(
-            HystrixThreadPoolProperties.defaultSetter()
-                .withMaxQueueSize(5)
-                .withQueueSizeRejectionThreshold(5));
+    return Setter
+      .withGroupKey(HystrixCommandGroupKey.Factory.asKey("s3"))
+      .andCommandKey(HystrixCommandKey.Factory.asKey(s3.getRegionName()))
+      .andCommandPropertiesDefaults(
+        HystrixCommandProperties
+          .defaultSetter()
+          .withCircuitBreakerRequestVolumeThreshold(5)
+          .withExecutionTimeoutEnabled(false)
+      )
+      .andThreadPoolPropertiesDefaults(
+        HystrixThreadPoolProperties
+          .defaultSetter()
+          .withMaxQueueSize(5)
+          .withQueueSizeRejectionThreshold(5)
+      );
   }
 
   private static <T> T checkNotNull(T value, String parameterName) {
@@ -72,6 +79,7 @@ public class HystrixS3Decorator extends S3Decorator {
   }
 
   private static class S3Command<T> extends HystrixCommand<T> {
+
     private final Supplier<T> callable;
 
     private S3Command(Setter setter, Supplier<T> callable) {

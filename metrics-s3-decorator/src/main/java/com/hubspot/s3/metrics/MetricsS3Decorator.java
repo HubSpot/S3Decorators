@@ -1,7 +1,5 @@
 package com.hubspot.s3.metrics;
 
-import java.util.function.Supplier;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.codahale.metrics.Meter;
@@ -9,8 +7,10 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
 import com.hubspot.s3.S3Decorator;
+import java.util.function.Supplier;
 
 public class MetricsS3Decorator extends S3Decorator {
+
   private final AmazonS3 delegate;
   private final Timer requestTimer;
   private final Meter exceptionMeter;
