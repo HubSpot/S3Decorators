@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>60.0</version>
+    <version>61.2</version>
   </parent>
 
   <artifactId>s3-decorators</artifactId>
@@ -18,10 +18,6 @@
     <module>failsafe-s3-decorator</module>
     <module>metrics-s3-decorator</module>
   </modules>
-
-  <properties>
-    <dep.commons-codec.version>1.11</dep.commons-codec.version>
-  </properties>
 
   <dependencyManagement>
     <dependencies>
