@@ -1519,14 +1519,14 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
 
   @Override
   public GetBucketOwnershipControlsResult getBucketOwnershipControls(
-          GetBucketOwnershipControlsRequest ownershipControlsRequest
+    GetBucketOwnershipControlsRequest ownershipControlsRequest
   ) {
     return call(() -> getDelegate().getBucketOwnershipControls(ownershipControlsRequest));
   }
 
   @Override
   public SetBucketOwnershipControlsResult setBucketOwnershipControls(
-          SetBucketOwnershipControlsRequest ownershipControlsRequest
+    SetBucketOwnershipControlsRequest ownershipControlsRequest
   ) {
     return call(() -> getDelegate().setBucketOwnershipControls(ownershipControlsRequest));
   }
