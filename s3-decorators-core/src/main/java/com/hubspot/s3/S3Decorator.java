@@ -69,6 +69,8 @@ import com.amazonaws.services.s3.model.GetBucketLoggingConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketMetricsConfigurationRequest;
 import com.amazonaws.services.s3.model.GetBucketMetricsConfigurationResult;
 import com.amazonaws.services.s3.model.GetBucketNotificationConfigurationRequest;
+import com.amazonaws.services.s3.model.GetBucketOwnershipControlsRequest;
+import com.amazonaws.services.s3.model.GetBucketOwnershipControlsResult;
 import com.amazonaws.services.s3.model.GetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.GetBucketPolicyStatusRequest;
 import com.amazonaws.services.s3.model.GetBucketPolicyStatusResult;
@@ -139,6 +141,8 @@ import com.amazonaws.services.s3.model.SetBucketLoggingConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketMetricsConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketMetricsConfigurationResult;
 import com.amazonaws.services.s3.model.SetBucketNotificationConfigurationRequest;
+import com.amazonaws.services.s3.model.SetBucketOwnershipControlsRequest;
+import com.amazonaws.services.s3.model.SetBucketOwnershipControlsResult;
 import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.SetBucketReplicationConfigurationRequest;
 import com.amazonaws.services.s3.model.SetBucketTaggingConfigurationRequest;
@@ -1511,6 +1515,20 @@ public abstract class S3Decorator extends AbstractAmazonS3 {
     PresignedUrlUploadRequest presignedUrlUploadRequest
   ) {
     return call(() -> getDelegate().upload(presignedUrlUploadRequest));
+  }
+
+  @Override
+  public GetBucketOwnershipControlsResult getBucketOwnershipControls(
+    GetBucketOwnershipControlsRequest ownershipControlsRequest
+  ) {
+    return call(() -> getDelegate().getBucketOwnershipControls(ownershipControlsRequest));
+  }
+
+  @Override
+  public SetBucketOwnershipControlsResult setBucketOwnershipControls(
+    SetBucketOwnershipControlsRequest ownershipControlsRequest
+  ) {
+    return call(() -> getDelegate().setBucketOwnershipControls(ownershipControlsRequest));
   }
 
   @Override
