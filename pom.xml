@@ -5,12 +5,15 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>62.1</version>
+    <version>63.0</version>
   </parent>
 
   <artifactId>s3-decorators</artifactId>
   <version>0.12-SNAPSHOT</version>
   <packaging>pom</packaging>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>Decorator for Amazon's Java S3 client in order to intercept all calls and add behavior</description>
 
   <modules>
     <module>s3-decorators-core</module>
@@ -48,4 +51,20 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <url>https://github.com/HubSpot/S3Decorators</url>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Jared Stehler</name>
+      <email>jstehler@hubspot.com</email>
+    </developer>
+  </developers>
 </project>
