@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>s3-decorators</artifactId>
-  <version>0.13</version>
+  <version>0.14-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
@@ -67,8 +67,4 @@
       <email>jstehler@hubspot.com</email>
     </developer>
   </developers>
-
-  <scm>
-    <tag>s3-decorators-0.13</tag>
-  </scm>
 </project>
