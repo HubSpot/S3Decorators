@@ -9,6 +9,7 @@
   </parent>
 
   <artifactId>failsafe-s3-decorator</artifactId>
+  <name>${project.groupId}:${project.artifactId}</name>
 
   <dependencies>
     <dependency>
