@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>s3-decorators</artifactId>
-    <version>0.13-SNAPSHOT</version>
+    <version>0.13</version>
   </parent>
 
   <artifactId>failsafe-s3-decorator</artifactId>
@@ -43,4 +43,8 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <scm>
+    <tag>s3-decorators-0.13</tag>
+  </scm>
 </project>
